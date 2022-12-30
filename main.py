@@ -5,24 +5,13 @@ import logging
 import argparse
 import random
 import quarto
-
-
-class RandomPlayer(quarto.Player):
-    """Random player"""
-
-    def __init__(self, quarto: quarto.Quarto) -> None:
-        super().__init__(quarto)
-
-    def choose_piece(self) -> int:
-        return random.randint(0, 15)
-
-    def place_piece(self) -> tuple[int, int]:
-        return random.randint(0, 3), random.randint(0, 3)
-
+import MCTS
+import RandomPlayer
 
 def main():
     game = quarto.Quarto()
-    game.set_players((RandomPlayer(game), RandomPlayer(game)))
+    game.set_players((RandomPlayer.RandomPlayer(game), RandomPlayer.RandomPlayer(game)))
+    # game.set_players((MCTS.MCTSPlayer(game), RandomPlayer(game)))
     winner = game.run()
     logging.warning(f"main: Winner: player {winner}")
 

@@ -44,8 +44,6 @@ class Node:
         self.state = state
         self.parent = parent
         self.children = list()
-        self.reward = random.uniform(0.5, 1.0)
-        self._alpha = alpha
         self.wins = 0
         self.visits = 0
         self.functions = UsefulFunctions()

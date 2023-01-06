@@ -9,8 +9,8 @@ class UsefulFunctions:
     def __init__(self) -> None:
         pass
 
-    def do_one_random_step(self, state: quarto.Quarto):
-        '''Does one random game beginning on the current state to create another one'''
+    def free_pieces_and_places(state: quarto.Quarto):
+        '''Returns all possible free pieces and places for the current state'''
 
         free_pieces = [piece for piece in range(0, 16) if piece not in state.__board]
         free_places = []
@@ -18,6 +18,13 @@ class UsefulFunctions:
             for j in range(0, 3):
                 if state.__board[j, i] == -1:
                     free_places.append((i, j))
+
+        return free_pieces, free_places
+
+    def do_one_random_step(self, state: quarto.Quarto):
+        '''Does one random game beginning on the current state to create another one'''
+
+        free_pieces, free_places = self.free_pieces_and_places(state)
         piece = random.choice(free_pieces)
         x, y = random.choice(free_places)
         state.select(piece)
@@ -32,17 +39,27 @@ class UsefulFunctions:
 
 class Node:
     '''Defines a Node for our tree'''
-    def __init__(self, state: quarto.Quarto, player_id, parent=None, end_point=False):
+
+    def __init__(self, state: quarto.Quarto, player_id, parent=None, end_point=False, alpha = 0.15):
         self.state = state
         self.parent = parent
         self.children = list()
+        self.reward = random.uniform(0.5, 1.0)
+        self._alpha = alpha
         self.wins = 0
         self.visits = 0
+        self.functions = UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
 
     def __hash__(self) -> int:
         return hash(bytes(self))
+
+    def max_expansion(self) -> int:
+        '''Calculates the maximum children that a node can hava'''
+
+        free_pieces, free_places = self.functions.free_pieces_and_places(self.state)
+        return len(free_pieces)*len(free_places)
     
     def add_child(self, child_state: quarto.Quarto):
         '''Adds a new child to the list'''
@@ -51,6 +68,11 @@ class Node:
             child = Node(child_state, self.player_id, self, True)
         else:
             child = Node(child_state, self.player_id, self)
+
+        # A new random state was created and the choosing and placing part have been done randomly
+        # Starting from this new state, the game will be simulated, so we need to tidy up the current player
+        child.state.__current_player = (child.state.__current_player + 1) % child.state.MAX_PLAYERS 
+
         self.children.append(child)
         return child
 
@@ -63,7 +85,7 @@ class Node:
         '''Updates node statistics'''
 
         self.visits += 1
-        self.wins += result # result can be +1 or -1
+        self.wins += result # result can be +1 or 0
 
 class MCTS:
     '''Defines the function to build a MCTS'''
@@ -74,18 +96,19 @@ class MCTS:
         '''Traverses the tree with recursion by using the upper confidence bound for tree traversal until 
         it reaches a leaf node'''
 
-        if not node.children and not node.end_point:
-            return node # Find a node that can be expanded
-
-        if node.end_point:
-            return None # Find a leaf node, it cannot be expanded
-
-        while node.children:
-            res = self.traverse_tree(node.select_child()) # Recursion
-            if res != None:
-                return res
-
+        while node.end_point == False:
+            if not node.children:
+                return node # Expand the node that doesn't have children
+            elif node.children:
+                if random.random() < .5: # Random decision
+                    node = self.best_child(node) # Continue the search
+                else:
+                    if node.max_expansion() == len(node.children): # If the node reach the maximum number of children that it can have
+                        node = self.best_child(node) # Continue the search
+                    else:
+                        return node # Expand the node
         return None
+        
 
     def expand_tree(self, node: Node):
         '''Chooses randomly a possible new node'''
@@ -98,7 +121,7 @@ class MCTS:
                 node_tmp = Node(new_state, node.player_id, node, True)
             else:
                 node_tmp = Node(new_state, node.player_id, node)
-            if node_tmp not in [child for child in node.children]: # Control if the random expansion has already been done
+            if node_tmp not in [child for child in node.children]: # Control if this random expansion has already been done
                 flag = False
 
         new_node = node.add_child(new_state) # Append a new child
@@ -108,7 +131,7 @@ class MCTS:
         '''Simulates the game from the given state to the end'''
         
         result = self.functions.simulate_game(copy.deepcopy(node.state))
-        if result == node.player_id:
+        if result == node.player_id: # Win
             return 1
         else:
             return 0
@@ -144,12 +167,13 @@ class MCTSPlayer(quarto.Player):
 
     def train(self, node: Node, iterations: int) -> Node:
         '''Trains the tree'''
+
         for _ in range(iterations):
-            pending_node = self.MCTS.traverse_tree(node) # SELECTION
-            if pending_node == None: # Not found any expandable node
-                break
-            new_node = self.MCTS.expand_tree(pending_node) # EXPANSION
-            if new_node.end_point: # Found an end point
+            selected_node = self.MCTS.traverse_tree(node) # SELECTION
+            if selected_node == None: # Not found any expandable node
+                continue
+            new_node = self.MCTS.expand_tree(selected_node) # EXPANSION
+            if new_node.end_point: # Found an end point (leaf node)
                 continue
             result = self.MCTS.simulation(new_node) # SIMULATION
             self.MCTS.backpropagation(new_node, result) # BACKPROPAGATION

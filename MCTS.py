@@ -56,7 +56,7 @@ class Node:
         return hash(bytes(self))
 
     def max_expansion(self) -> int:
-        '''Calculates the maximum children that a node can hava'''
+        '''Calculates the maximum children that a node can have'''
 
         free_pieces, free_places = self.functions.free_pieces_and_places(self.state)
         return len(free_pieces)*len(free_places)

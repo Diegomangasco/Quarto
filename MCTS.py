@@ -9,14 +9,15 @@ class UsefulFunctions:
     def __init__(self) -> None:
         pass
 
-    def free_pieces_and_places(state: quarto.Quarto):
+    def free_pieces_and_places(self, state: quarto.Quarto):
         '''Returns all possible free pieces and places for the current state'''
 
-        free_pieces = [piece for piece in range(0, 16) if piece not in state.__board]
+        board = state.get_board_status()
+        free_pieces = [piece for piece in range(0, 16) if piece not in board]
         free_places = []
         for i in range(0, 3):
             for j in range(0, 3):
-                if state.__board[j, i] == -1:
+                if board[j, i] == -1:
                     free_places.append((i, j))
 
         return free_pieces, free_places
@@ -40,7 +41,7 @@ class UsefulFunctions:
 class Node:
     '''Defines a Node for our tree'''
 
-    def __init__(self, state: quarto.Quarto, player_id, parent=None, end_point=False, alpha = 0.15):
+    def __init__(self, state: quarto.Quarto, player_id, parent=None, end_point=False):
         self.state = state
         self.parent = parent
         self.children = list()
@@ -167,13 +168,17 @@ class MCTSPlayer(quarto.Player):
         '''Trains the tree'''
 
         for _ in range(iterations):
+            print("Iteration", _)
             selected_node = self.MCTS.traverse_tree(node) # SELECTION
+            print("Selected node: ", selected_node)
             if selected_node == None: # Not found any expandable node
                 continue
             new_node = self.MCTS.expand_tree(selected_node) # EXPANSION
+            print("New node", new_node)
             if new_node.end_point: # Found an end point (leaf node)
                 continue
             result = self.MCTS.simulation(new_node) # SIMULATION
+            print("Print result", result)
             self.MCTS.backpropagation(new_node, result) # BACKPROPAGATION
 
         return self.MCTS.best_child(node)

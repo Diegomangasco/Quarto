@@ -1,29 +1,8 @@
-# Free for personal or classroom use; see 'LICENSE.md' for details.
-# https://github.com/squillero/computational-intelligence
-
 import numpy as np
-from abc import abstractmethod
 import copy
+import random
 
-
-class Player(object):
-
-    def __init__(self, quarto) -> None:
-        self.__quarto = quarto
-
-    @abstractmethod
-    def choose_piece(self) -> int:
-        pass
-
-    @abstractmethod
-    def place_piece(self) -> tuple[int, int]:
-        pass
-
-    def get_game(self):
-        return self.__quarto
-
-
-class Piece(object):
+class PieceTrain(object):
 
     def __init__(self, high: bool, coloured: bool, solid: bool, square: bool) -> None:
         self.HIGH = high
@@ -31,8 +10,7 @@ class Piece(object):
         self.SOLID = solid
         self.SQUARE = square
 
-
-class Quarto(object):
+class QuartoTrain(object):
 
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
@@ -41,38 +19,46 @@ class Quarto(object):
         self.__players = ()
         self.reset()
 
+
     def reset(self):
-        self.__board = np.ones(
-            shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
+        self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
         self.__pieces = []
-        self.__pieces.append(Piece(False, False, False, False))  # 0
-        self.__pieces.append(Piece(False, False, False, True))  # 1
-        self.__pieces.append(Piece(False, False, True, False))  # 2
-        self.__pieces.append(Piece(False, False, True, True))  # 3
-        self.__pieces.append(Piece(False, True, False, False))  # 4
-        self.__pieces.append(Piece(False, True, False, True))  # 5
-        self.__pieces.append(Piece(False, True, True, False))  # 6
-        self.__pieces.append(Piece(False, True, True, True))  # 7
-        self.__pieces.append(Piece(True, False, False, False))  # 8
-        self.__pieces.append(Piece(True, False, False, True))  # 9
-        self.__pieces.append(Piece(True, False, True, False))  # 10
-        self.__pieces.append(Piece(True, False, True, True))  # 11
-        self.__pieces.append(Piece(True, True, False, False))  # 12
-        self.__pieces.append(Piece(True, True, False, True))  # 13
-        self.__pieces.append(Piece(True, True, True, False))  # 14
-        self.__pieces.append(Piece(True, True, True, True))  # 15
-        self._current_player = 0
+        self.__pieces.append(PieceTrain(False, False, False, False))  # 0
+        self.__pieces.append(PieceTrain(False, False, False, True))  # 1
+        self.__pieces.append(PieceTrain(False, False, True, False))  # 2
+        self.__pieces.append(PieceTrain(False, False, True, True))  # 3
+        self.__pieces.append(PieceTrain(False, True, False, False))  # 4
+        self.__pieces.append(PieceTrain(False, True, False, True))  # 5
+        self.__pieces.append(PieceTrain(False, True, True, False))  # 6
+        self.__pieces.append(PieceTrain(False, True, True, True))  # 7
+        self.__pieces.append(PieceTrain(True, False, False, False))  # 8
+        self.__pieces.append(PieceTrain(True, False, False, True))  # 9
+        self.__pieces.append(PieceTrain(True, False, True, False))  # 10
+        self.__pieces.append(PieceTrain(True, False, True, True))  # 11
+        self.__pieces.append(PieceTrain(True, True, False, False))  # 12
+        self.__pieces.append(PieceTrain(True, True, False, True))  # 13
+        self.__pieces.append(PieceTrain(True, True, True, False))  # 14
+        self.__pieces.append(PieceTrain(True, True, True, True))  # 15
+        self.__current_player = 0
         self.__selected_piece_index = -1
+        self.__selected_place_index = ()
 
-    def set_players(self, players: tuple[Player, Player]):
-        self.__players = players
-
-    def get_current_player(self) -> int:
+    def get_board_status(self) -> np.ndarray:
         '''
-        Gets the current player
+        Get the current board status (pieces are represented by index)
         '''
-        return self._current_player
+        return copy.deepcopy(self.__board)
+    
+    def get_selected_piece(self):
+        '''Get the current selected piece'''
 
+        return self.__selected_piece_index
+
+    def get_selected_place(self):
+        '''Get the current place choosen'''
+
+        return self.__selected_place_index
+     
     def select(self, pieceIndex: int) -> bool:
         '''
         select a piece. Returns True on success
@@ -88,41 +74,12 @@ class Quarto(object):
         '''
         if self.__placeable(x, y):
             self.__board[y, x] = self.__selected_piece_index
+            self.__selected_place_index = (x, y)
             return True
         return False
 
     def __placeable(self, x: int, y: int) -> bool:
         return not (y < 0 or x < 0 or x > 3 or y > 3 or self.__board[y, x] >= 0)
-
-    def print(self):
-        '''
-        Print the board
-        '''
-        for row in self.__board:
-            print("\n -------------------")
-            print("|", end="")
-            for element in row:
-                print(f" {element: >2}", end=" |")
-        print("\n -------------------\n")
-        print(f"Selected piece: {self.__selected_piece_index}\n")
-
-    def get_piece_charachteristics(self, index: int) -> Piece:
-        '''
-        Gets charachteristics of a piece (index-based)
-        '''
-        return copy.deepcopy(self.__pieces[index])
-
-    def get_board_status(self) -> np.ndarray:
-        '''
-        Get the current board status (pieces are represented by index)
-        '''
-        return copy.deepcopy(self.__board)
-
-    def get_selected_piece(self) -> int:
-        '''
-        Get index of selected piece
-        '''
-        return copy.deepcopy(self.__selected_piece_index)
 
     def __check_horizontal(self) -> int:
         for i in range(self.BOARD_SIDE):
@@ -157,7 +114,7 @@ class Quarto(object):
                         noncolor_values) == self.BOARD_SIDE or len(
                             hollow_values) == self.BOARD_SIDE or len(
                                 circle_values) == self.BOARD_SIDE:
-                return self._current_player
+                return self.__current_player
         return -1
 
     def __check_vertical(self):
@@ -193,7 +150,7 @@ class Quarto(object):
                         noncolor_values) == self.BOARD_SIDE or len(
                             hollow_values) == self.BOARD_SIDE or len(
                                 circle_values) == self.BOARD_SIDE:
-                return self._current_player
+                return self.__current_player
         return -1
 
     def __check_diagonal(self):
@@ -227,9 +184,9 @@ class Quarto(object):
         if len(high_values) == self.BOARD_SIDE or len(coloured_values) == self.BOARD_SIDE or len(
                 solid_values) == self.BOARD_SIDE or len(square_values) == self.BOARD_SIDE or len(
                     low_values
-        ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
+                ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
                     hollow_values) == self.BOARD_SIDE or len(circle_values) == self.BOARD_SIDE:
-            return self._current_player
+            return self.__current_player
         high_values = []
         coloured_values = []
         solid_values = []
@@ -262,17 +219,16 @@ class Quarto(object):
         if len(high_values) == self.BOARD_SIDE or len(coloured_values) == self.BOARD_SIDE or len(
                 solid_values) == self.BOARD_SIDE or len(square_values) == self.BOARD_SIDE or len(
                     low_values
-        ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
+                ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
                     hollow_values) == self.BOARD_SIDE or len(circle_values) == self.BOARD_SIDE:
-            return self._current_player
+            return self.__current_player
         return -1
 
     def check_winner(self) -> int:
         '''
         Check who is the winner
         '''
-        l = [self.__check_horizontal(), self.__check_vertical(),
-             self.__check_diagonal()]
+        l = [self.__check_horizontal(), self.__check_vertical(), self.__check_diagonal()]
         for elem in l:
             if elem >= 0:
                 return elem
@@ -288,24 +244,23 @@ class Quarto(object):
                     return False
         return True
 
-    def run(self) -> int:
-        '''
-        Run the game (with output for every move)
-        '''
-        winner = -1
-        while winner < 0 and not self.check_finished():
-            self.print()
-            piece_ok = False
-            while not piece_ok:
-                piece_ok = self.select(
-                    self.__players[self._current_player].choose_piece())
-            piece_ok = False
-            self._current_player = (
-                self._current_player + 1) % self.MAX_PLAYERS
-            self.print()
-            while not piece_ok:
-                x, y = self.__players[self._current_player].place_piece()
-                piece_ok = self.place(x, y)
-            winner = self.check_winner()
-        self.print()
-        return winner
+    def run(self, free_pieces: list, free_places: list, single=True) -> int:
+            '''
+            Run the game one or multiple times
+            '''
+            winner = -1
+            while winner < 0 and not self.check_finished():
+                _ = self.select(random.choice(free_pieces))
+                self.__current_player = (self.__current_player + 1) % self.MAX_PLAYERS
+                place = random.choice(free_places)
+                _ = self.place(place[0], place[1])
+                free_pieces.remove(self.__selected_piece_index)  
+                free_places.remove(self.__selected_place_index)
+                winner = self.check_winner()
+                if single == True:
+                    break
+            
+            if single == True:
+                return 
+            else:
+                return winner

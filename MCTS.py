@@ -1,58 +1,35 @@
 import random
-import quarto
 import copy
 import math
-import RandomPlayer
-
-class UsefulFunctions:
-    '''Defines useful function for the training'''
-    def __init__(self) -> None:
-        pass
-
-    def free_pieces_and_places(self, state: quarto.Quarto):
-        '''Returns all possible free pieces and places for the current state'''
-
-        board = state.get_board_status()
-        free_pieces = [piece for piece in range(0, 16) if piece not in board]
-        free_places = []
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if board[j, i] == -1:
-                    free_places.append((i, j))
-
-        return free_pieces, free_places
-
-    def do_one_random_step(self, state: quarto.Quarto):
-        '''Does one random game beginning on the current state to create another one'''
-
-        free_pieces, free_places = self.free_pieces_and_places(state)
-        piece = random.choice(free_pieces)
-        x, y = random.choice(free_places)
-        state.select(piece)
-        state.place(x, y)
-        return state
-
-    def simulate_game(self, state: quarto.Quarto):
-        '''Simulates a game untill the end'''
-
-        winner = state.run()
-        return winner
+import quartoTrain as train
+import lib
 
 class Node:
     '''Defines a Node for our tree'''
 
-    def __init__(self, state: quarto.Quarto, player_id, parent=None, end_point=False):
+    def __init__(self, state: train.QuartoTrain, player_id, parent=None, end_point=False):
         self.state = state
         self.parent = parent
         self.children = list()
         self.wins = 0
         self.visits = 0
-        self.functions = UsefulFunctions()
+        self.functions = lib.UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
 
     def __hash__(self) -> int:
         return hash(bytes(self))
+
+    def already_has_child(self, new_state: train.QuartoTrain):
+        '''Controls if the state created is already present in node's children'''
+        
+        board_1 = new_state.get_board_status()
+        for child in self.children:
+            board_2 = child.state.get_board_status()
+            if self.functions.equal_boards(board_1, board_2):
+                return True
+
+        return False
 
     def max_expansion(self) -> int:
         '''Calculates the maximum children that a node can have'''
@@ -60,17 +37,13 @@ class Node:
         free_pieces, free_places = self.functions.free_pieces_and_places(self.state)
         return len(free_pieces)*len(free_places)
     
-    def add_child(self, child_state: quarto.Quarto):
+    def add_child(self, child_state: train.QuartoTrain):
         '''Adds a new child to the list'''
 
         if child_state.check_finished() or child_state.check_winner() != -1:
             child = Node(child_state, self.player_id, self, True)
         else:
-            child = Node(child_state, self.player_id, self)
-
-        # A new random state was created and the choosing and placing part have been done randomly
-        # Starting from this new state, the game will be simulated, so we need to tidy up the current player
-        child.state.__current_player = (child.state.__current_player + 1) % child.state.MAX_PLAYERS 
+            child = Node(child_state, self.player_id, self) 
 
         self.children.append(child)
         return child
@@ -84,12 +57,12 @@ class Node:
         '''Updates node statistics'''
 
         self.visits += 1
-        self.wins += result # result can be +1 or 0
+        self.wins += result # result can be +1 (win) or 0 (draw or loose)
 
 class MCTS:
     '''Defines the function to build a MCTS'''
     def __init__(self) -> None:
-        self.functions = UsefulFunctions()
+        self.functions = lib.UsefulFunctions()
 
     def traverse_tree(self, node: Node):
         '''Traverses the tree with recursion by using the upper confidence bound for tree traversal until 
@@ -98,14 +71,16 @@ class MCTS:
         while node.end_point == False:
             if not node.children:
                 return node # Expand the node that doesn't have children
-            elif node.children:
+            else:
                 if random.random() < .5: # Random decision
-                    node = self.best_child(node) # Continue the search
+                    node = self.best_child(node) # Continue the traversal
                 else:
-                    if node.max_expansion() == len(node.children): # If the node reach the maximum number of children that it can have
-                        node = self.best_child(node) # Continue the search
+                    if node.max_expansion() == len(node.children): 
+                        # If the node reach the maximum number of children that it can have, continue the traversal
+                        node = self.best_child(node)
                     else:
                         return node # Expand the node
+        
         return None
         
 
@@ -116,11 +91,7 @@ class MCTS:
         flag = True
         while flag:
             new_state = self.functions.do_one_random_step(copy.deepcopy(node.state))
-            if new_state.check_finished() or new_state.check_winner() != -1: # Create a tmp node for checking
-                node_tmp = Node(new_state, node.player_id, node, True)
-            else:
-                node_tmp = Node(new_state, node.player_id, node)
-            if node_tmp not in [child for child in node.children]: # Control if this random expansion has already been done
+            if not node.already_has_child(new_state): # Control if this random expansion has already been done
                 flag = False
 
         new_node = node.add_child(new_state) # Append a new child
@@ -149,36 +120,23 @@ class MCTS:
         return max(node.children, key=lambda x: x.wins/x.visits)
 
 
-class MCTSPlayer(quarto.Player):
-    '''MonteCarlo Tree Search player'''
+class MCTSTrain():
+    '''MonteCarlo Tree Search class for training the tree'''
 
-    def __init__(self, quarto) -> None:
-        super().__init__(quarto)
+    def __init__(self) -> None:
         self.MCTS = MCTS()
-
-    def choose_piece(self) -> int:
-        # TODO
-        return super().choose_piece()
-
-    def place_piece(self) -> tuple[int, int]:
-        # TODO
-        return super().place_piece()
 
     def train(self, node: Node, iterations: int) -> Node:
         '''Trains the tree'''
 
         for _ in range(iterations):
-            print("Iteration", _)
             selected_node = self.MCTS.traverse_tree(node) # SELECTION
-            print("Selected node: ", selected_node)
             if selected_node == None: # Not found any expandable node
                 continue
             new_node = self.MCTS.expand_tree(selected_node) # EXPANSION
-            print("New node", new_node)
             if new_node.end_point: # Found an end point (leaf node)
                 continue
             result = self.MCTS.simulation(new_node) # SIMULATION
-            print("Print result", result)
             self.MCTS.backpropagation(new_node, result) # BACKPROPAGATION
 
         return self.MCTS.best_child(node)

@@ -1,10 +1,12 @@
-from MCTS import *
-from quarto import *
+import quartoTrain as train
+import MCTS
 
-board = quarto.Quarto()
+board = train.QuartoTrain()
 
-root = Node(board, 1)
+root = MCTS.Node(board, 1)
 
-mcts = MCTSPlayer(board)
+mcts = MCTS.MCTSTrain()
 
-mcts.train(root, 50)
+res = mcts.train(root, 1000)
+
+print(root.select_child().wins/root.select_child().visits)

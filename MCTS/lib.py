@@ -1,4 +1,4 @@
-import quartoTrain as train
+import MCTS.quartoTrain as train
 
 class UsefulFunctions:
     '''Defines useful function for the training'''

@@ -1,8 +1,8 @@
 import random
 import copy
 import math
-import quartoTrain as train
-import lib
+import MCTS.quartoTrain as train
+import MCTS.lib as lib
 
 class Node:
     '''Defines a Node for our tree'''
@@ -119,25 +119,18 @@ class MCTS:
 
         return max(node.children, key=lambda x: x.wins/x.visits)
 
-
-class MCTSTrain():
-    '''MonteCarlo Tree Search class for training the tree'''
-
-    def __init__(self) -> None:
-        self.MCTS = MCTS()
-
     def train(self, node: Node, iterations: int) -> Node:
         '''Trains the tree'''
 
         for _ in range(iterations):
-            selected_node = self.MCTS.traverse_tree(node) # SELECTION
+            selected_node = self.traverse_tree(node) # SELECTION
             if selected_node == None: # Not found any expandable node
                 continue
-            new_node = self.MCTS.expand_tree(selected_node) # EXPANSION
+            new_node = self.expand_tree(selected_node) # EXPANSION
             if new_node.end_point: # Found an end point (leaf node)
                 continue
-            result = self.MCTS.simulation(new_node) # SIMULATION
-            self.MCTS.backpropagation(new_node, result) # BACKPROPAGATION
+            result = self.simulation(new_node) # SIMULATION
+            self.backpropagation(new_node, result) # BACKPROPAGATION
 
-        return self.MCTS.best_child(node)
-            
+        # TODO
+        # Write all in database.json

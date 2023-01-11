@@ -1,11 +1,11 @@
-import quartoTrain as train
-import MCTS
+import MCTS.quartoTrain as train
+import MCTS.MCTS as MCTS
 
 board = train.QuartoTrain()
 
 root = MCTS.Node(board, 1)
 
-mcts = MCTS.MCTSTrain()
+mcts = MCTS.MCTS()
 
 res = mcts.train(root, 1000)
 

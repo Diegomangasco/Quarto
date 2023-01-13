@@ -16,9 +16,7 @@ class QuartoTrain(object):
     BOARD_SIDE = 4
 
     def __init__(self) -> None:
-        self.__players = ()
         self.reset()
-
 
     def reset(self):
         self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
@@ -250,7 +248,8 @@ class QuartoTrain(object):
             '''
             winner = -1
             while winner < 0 and not self.check_finished():
-                _ = self.select(random.choice(free_pieces))
+                piece = random.choice(free_pieces)
+                _ = self.select(piece)
                 self.__current_player = (self.__current_player + 1) % self.MAX_PLAYERS
                 place = random.choice(free_places)
                 _ = self.place(place[0], place[1])
@@ -261,6 +260,6 @@ class QuartoTrain(object):
                     break
             
             if single == True:
-                return 
+                return piece, place
             else:
                 return winner

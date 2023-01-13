@@ -1,7 +1,8 @@
-import MCTS.quartoTrain as train
+from .quartoTrain import *
 
-class UsefulFunctions:
+class UsefulFunctions(object):
     '''Defines useful function for the training'''
+
     def __init__(self) -> None:
         pass
 
@@ -15,7 +16,7 @@ class UsefulFunctions:
 
         return True
 
-    def free_pieces_and_places(self, state: train.QuartoTrain):
+    def free_pieces_and_places(self, state: QuartoTrain):
         '''Returns all possible free pieces and places for the current state'''
 
         board = state.get_board_status()
@@ -24,14 +25,14 @@ class UsefulFunctions:
         
         return free_pieces, free_places
 
-    def do_one_random_step(self, state: train.QuartoTrain):
+    def do_one_random_step(self, state: QuartoTrain):
         '''Does one random game beginning on the current state to create another one'''
 
         free_pieces, free_places = self.free_pieces_and_places(state)
-        state.run(free_pieces, free_places) # Run only one move to create a new state
-        return state
+        piece, place = state.run(free_pieces, free_places) # Run only one move to create a new state
+        return state, piece, place
 
-    def simulate_game(self, state: train.QuartoTrain):
+    def simulate_game(self, state: QuartoTrain):
         '''Simulates a game untill the end'''
 
         free_pieces, free_places = self.free_pieces_and_places(state)

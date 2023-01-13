@@ -1,7 +1,7 @@
 import random as rnd
 import quarto 
 import numpy as np
-import MCTS.API as api
+from ..MCTS.API import *
 import random
 import matplotlib as plt
 
@@ -15,7 +15,7 @@ class RLPlayer(quarto.Player):
         self._gamma = gamma
         self._random_factor = random_factor
         self._G = {}
-        self.api = api.API()
+        self._api_MCTS = API()
         self._epochs = []
         self._wins = []
 
@@ -60,60 +60,76 @@ class RLPlayer(quarto.Player):
         return next_move
 
     def get_related_nodes(self, node):
-        return self.api.get_children(node)
+        return self._api_MCTS.get_children(node)
 
-    def init_reward(self, state) -> None:
-        self._G[state] = rnd.uniform(a=1.0, b=0.1)
+    def init_reward(self, state: quarto.Quarto) -> float:
+        '''Inits reward for a certain state'''
+
+        reward = rnd.uniform(a=1.0, b=0.1)
+        self._G[state] = reward
+        return reward
 
     def update_state_history(self, state: quarto.Quarto, reward: float) -> None:
-        self._state_history.append((state, reward))
+        '''Updates the history of the visited nodes'''
+        if (state, reward) not in self._state_history:
+            self._state_history.append((state, reward))
 
     def learn(self) -> None:
         target = 0
         for prev, reward in reversed(self._state_history):
-            future_probabilities = self.api.generate_future_probs_using_MCTS(prev)
+            future_probabilities = self._api_MCTS.generate_future_probs_using_MCTS(prev)
             if future_probabilities:
                 expected_values = np.dot(future_probabilities, self.get_related_nodes(prev))
                 self._G[tuple(prev)] = (1-self._alpha)*self._G[tuple(prev)] + self._alpha*(target*self._gamma*np.max(expected_values) - self._G[tuple(prev)])
             else:
-                self._G[tuple(prev)] = self._G[tuple(prev)] + self._alpha * (target - self._G[tuple(prev)])
+                self._G[tuple(prev)] = (1-self._alpha)*self._G[tuple(prev)] + self._alpha*(target - self._G[tuple(prev)])
             target += reward
         self._state_history = []
         self._random_factor -= 10e-5  # decrease random factor each episode of play
 
-    def train(self, iterations, root):
+    def train(self, root, iterations=5000):
+        '''Trains the RL agent against a Random Player'''
+
         number_win_local = 0
         for _ in range(iterations):
-            lead = root
+            lead = root.state
             our_player = 0
             current_player = random.choice([0, 1])
 
-            while not self.api.is_terminal(lead):
+            while not self._api_MCTS.is_terminal(lead):
 
                 if our_player == current_player:
-                    node = self.api.choose_node_using_MCTS(lead)
+                    piece_place_score = self._api_MCTS.choose_node_using_MCTS(lead)
 
-                    if not node:
+                    if not piece_place_score:
                         # Node not present in database, do a random action
-                        pass
+                        new_state=#TODO
                     
-                    if node not in self._G.keys():
-                        self.init_reward(node)
-                    
-                    reward = self.api.get_reward(node)
-                    self.update_state_history(node, reward)
+                        if new_state not in self._G.keys():
+                            reward = self.init_reward(new_state)
+                        else:
+                            reward = self._G[new_state]
+                    else:
+                        new_state = self._api_MCTS.create_state(lead, piece_place_score)
+                        reward = piece_place_score[2]
+                        if new_state not in self._G.keys():
+                            self._G[new_state] = reward
 
-                    lead = node
+                    self.update_state_history(new_state, reward)
+                    lead = new_state
                     current_player = 1
 
                 else:
                     # Random player
-                    lead = node
+                    new_state = #TODO
+                    lead = new_state
                     current_player = 0
-            if self.api.check_if_won(lead):
+
+            if self._api_MCTS.check_if_won(lead, our_player):
+                # If out player won
                 number_win_local += 1
 
-            self.learn()
+            self.learn() # Learn from experience
 
             # Get a history of number of steps taken to plot later
             if _ % 50 == 0:
@@ -121,6 +137,7 @@ class RLPlayer(quarto.Player):
                 self._epochs.append(_)
                 number_win_local = 0
 
+        # Print graph statistics
         plt.semilogy(self._epochs, self._wins, "b")
         plt.show()
             

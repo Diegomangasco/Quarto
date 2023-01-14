@@ -7,6 +7,6 @@ root = Node(board, 1, -1, -1)
 
 mcts = MCTS()
 
-res = mcts.train(root, 10)
+mcts.train(root, 300, 1)
 
-print(root.select_child().wins/root.select_child().visits)
+

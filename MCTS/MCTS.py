@@ -3,6 +3,7 @@ import copy
 import math
 import json
 import numpy as np
+from threading import Lock, Thread
 from .quartoTrain import * 
 from .lib import *
 
@@ -20,12 +21,15 @@ class Node:
         self.functions = UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
+        self.lock = Lock()
 
     def hash_function(self):
+        '''Hash function to identify a node'''
+
         return hash(str(self.piece_to_move) + np.array2string(self.state.get_board_status()))
 
     def already_has_child(self, new_state: QuartoTrain):
-        '''Controls if the state created is already present in node's children'''
+        '''Controls if the new node created is already present in node's children'''
         
         board_1 = new_state.get_board_status()
         for child in self.children:
@@ -55,16 +59,20 @@ class Node:
     def select_child(self):
         '''Selects a child basing on the formula'''
 
-        return max(self.children, key=lambda x: x.wins/x.visits + math.sqrt(2*math.log(self.visits)/x.visits))
+        return max(self.children, key=lambda x: x.wins/(x.visits if x.visits!=0 else 1) 
+            + math.sqrt(2*math.log(self.visits if self.visits!=0 else 1)/(x.visits if x.visits!=0 else 1)))
     
     def update(self, result: int):
         '''Updates node statistics'''
 
+        self.lock.acquire()
         self.visits += 1
         self.wins += result # result can be +1 (win) or 0 (draw or loose)
+        self.lock.release()
 
 class MCTS:
     '''Defines the function to build a MCTS'''
+
     def __init__(self) -> None:
         self.functions = UsefulFunctions()
 
@@ -77,11 +85,11 @@ class MCTS:
                 return node # Expand the node that doesn't have children
             else:
                 if random.random() < .5: # Random decision
-                    node = self.best_child(node) # Continue the traversal
+                    node = node.select_child() # Continue the traversal
                 else:
                     if node.max_expansion() == len(node.children): 
                         # If the node reach the maximum number of children that it can have, continue the traversal
-                        node = self.best_child(node)
+                        node = node.select_child()
                     else:
                         return node # Expand the node
         
@@ -92,6 +100,7 @@ class MCTS:
         '''Chooses randomly a possible new node'''
 
         # We are sure that taking a step is possible since the building of the travel function
+        node.lock.acquire()
         flag = True
         while flag:
             new_state, piece, place = self.functions.do_one_random_step(copy.deepcopy(node.state))
@@ -99,6 +108,7 @@ class MCTS:
                 flag = False
 
         new_node = node.add_child(new_state, piece, place) # Append a new child
+        node.lock.release()
         return new_node
 
     def simulation(self, node: Node):
@@ -123,8 +133,8 @@ class MCTS:
 
         return max(node.children, key=lambda x: x.wins/x.visits)
 
-    def train(self, node: Node, iterations: int) -> Node:
-        '''Trains the tree adn saves the results in a .json file'''
+    def function_for_training(self, node: Node, iterations: int):
+        '''The basic function for the training'''
 
         for _ in range(iterations):
             selected_node = self.traverse_tree(node) # SELECTION
@@ -136,15 +146,28 @@ class MCTS:
             result = self.simulation(new_node) # SIMULATION
             self.backpropagation(new_node, result) # BACKPROPAGATION
 
-        tree = dict()
+    def train(self, node: Node, iterations: int, num_threads):
+        '''Trains the tree adn saves the results in a .json file'''
 
+        thread_pool = []
+        for _ in range(num_threads):
+            t = Thread(target=self.function_for_training, args=(node, iterations))
+            t.start()
+            thread_pool.append(t)
+        
+        for t in thread_pool: t.join()
+
+        tree = dict()
         self.save_tree(tree, node)
+
+        print(len(tree.keys()))
+        print(len(tree.values()))
 
         with open('./MCTS/database.json', 'w') as fp:
             json.dump(tree, fp)
     
     def save_tree(self, tree: dict, root: Node):
-        '''Saves the nodes created in a list'''
+        '''Saves the nodes created in a dictionary'''
 
         if not root.children:
             return

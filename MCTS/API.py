@@ -46,7 +46,6 @@ class API():
                 else:
                     return None
         
-
     def get_reward(self, node: Node):
         '''Gets the reward for a specific node'''
 

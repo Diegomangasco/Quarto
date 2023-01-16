@@ -1,10 +1,10 @@
 import random as rnd
 import quarto 
 import numpy as np
-from ..MCTS.API import *
-from ..MCTS.quartoTrain import *
+from MCTS.API import *
+from MCTS.quartoTrain import *
 import random
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 class RLPlayer(quarto.Player):
     '''Defines a Reinforcement Learning player'''

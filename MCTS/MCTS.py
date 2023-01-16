@@ -6,6 +6,8 @@ import numpy as np
 from .quartoTrain import * 
 from .lib import *
 
+VIRTUAL_LOSS = 3.0
+
 class Node:
     '''Defines a Node for our tree'''
 
@@ -20,6 +22,7 @@ class Node:
         self.functions = UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
+        self.virtual_loss = 0.0
 
     def already_has_child(self, new_state: QuartoTrain):
         '''Controls if the new node that would be created is already present in node's children'''
@@ -36,12 +39,6 @@ class Node:
                     return True
 
         return False
-
-    def max_expansion(self) -> int:
-        '''Calculates the maximum children that a node can have'''
-
-        free_pieces, free_places = self.functions.free_pieces_and_places(self.state)
-        return len(free_pieces)*len(free_places)
     
     def add_child(self, child_state: QuartoTrain, piece, place):
         '''Adds a new child to the list'''
@@ -55,10 +52,9 @@ class Node:
         return child
 
     def select_child(self):
-        '''Selects a child basing on the formula'''
+        '''Selects a child basing on the specific formula'''
 
-        return max(self.children, key=lambda x: x.wins/x.visits 
-            + math.sqrt(2*math.log(self.visits)/x.visits))
+        return max(self.children, key=lambda x: x.wins/x.visits + math.sqrt(2*math.log(self.visits)/x.visits))
     
     def update(self, result: int):
         '''Updates node statistics'''
@@ -71,6 +67,7 @@ class MCTS:
 
     def __init__(self) -> None:
         self.functions = UsefulFunctions()
+        self.max_children = 90
 
     def traverse_tree(self, node: Node):
         '''Traverses the tree with recursion by using the upper confidence bound for tree traversal until 
@@ -83,7 +80,7 @@ class MCTS:
                 if random.random() < .5: # Random decision
                     node = node.select_child() # Continue the traversal
                 else:
-                    if node.max_expansion() == len(node.children): 
+                    if self.max_children == len(node.children): 
                         # If the node reach the maximum number of children that it can have, continue the traversal
                         node = node.select_child()
                     else:
@@ -128,6 +125,7 @@ class MCTS:
         '''The basic function for the training'''
 
         for _ in range(iterations):
+            print('Iteration ', _)
             selected_node = self.traverse_tree(node) # SELECTION
             if selected_node == None: # Not found any expandable node
                 continue
@@ -144,9 +142,6 @@ class MCTS:
         tree = dict()
         item_root = self.save_tree(tree, root)
         tree[self.functions.hash_function(root.piece_to_move, root.state.get_board_status())] = item_root
-
-        print(len(tree.keys()))
-        print(len(tree.values()))
 
         with open('./MCTS/database.json', 'w') as fp:
             json.dump(tree, fp)

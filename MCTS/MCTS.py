@@ -3,7 +3,6 @@ import copy
 import math
 import json
 import numpy as np
-from threading import Lock, Thread
 from .quartoTrain import * 
 from .lib import *
 
@@ -21,21 +20,20 @@ class Node:
         self.functions = UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
-        self.lock = Lock()
-
-    def hash_function(self):
-        '''Hash function to identify a node'''
-
-        return hash(str(self.piece_to_move) + np.array2string(self.state.get_board_status()))
 
     def already_has_child(self, new_state: QuartoTrain):
-        '''Controls if the new node created is already present in node's children'''
+        '''Controls if the new node that would be created is already present in node's children'''
         
-        board_1 = new_state.get_board_status()
+        board_new_state = new_state.get_board_status()
+        rotate_90_clockwise, rotate_90_counter_clockwise, reflect_horizontal, reflect_vertical = self.functions.symmetries(board_new_state)
         for child in self.children:
-            board_2 = child.state.get_board_status()
-            if self.functions.equal_boards(board_1, board_2):
-                return True
+            board_already_present = child.state.get_board_status()
+            if (np.array_equal(board_new_state, board_already_present) or
+                np.array_equal(rotate_90_clockwise, board_already_present) or
+                np.array_equal(rotate_90_counter_clockwise, board_already_present) or
+                np.array_equal(reflect_horizontal, board_already_present) or
+                np.array_equal(reflect_vertical, board_already_present)):
+                    return True
 
         return False
 
@@ -59,16 +57,14 @@ class Node:
     def select_child(self):
         '''Selects a child basing on the formula'''
 
-        return max(self.children, key=lambda x: x.wins/(x.visits if x.visits!=0 else 1) 
-            + math.sqrt(2*math.log(self.visits if self.visits!=0 else 1)/(x.visits if x.visits!=0 else 1)))
+        return max(self.children, key=lambda x: x.wins/x.visits 
+            + math.sqrt(2*math.log(self.visits)/x.visits))
     
     def update(self, result: int):
         '''Updates node statistics'''
 
-        self.lock.acquire()
         self.visits += 1
         self.wins += result # result can be +1 (win) or 0 (draw or loose)
-        self.lock.release()
 
 class MCTS:
     '''Defines the function to build a MCTS'''
@@ -100,7 +96,6 @@ class MCTS:
         '''Chooses randomly a possible new node'''
 
         # We are sure that taking a step is possible since the building of the travel function
-        node.lock.acquire()
         flag = True
         while flag:
             new_state, piece, place = self.functions.do_one_random_step(copy.deepcopy(node.state))
@@ -108,17 +103,13 @@ class MCTS:
                 flag = False
 
         new_node = node.add_child(new_state, piece, place) # Append a new child
-        node.lock.release()
         return new_node
 
     def simulation(self, node: Node):
         '''Simulates the game from the given state to the end'''
         
         result = self.functions.simulate_game(copy.deepcopy(node.state))
-        if result == node.player_id: # Win
-            return 1
-        else:
-            return 0
+        return 1 if result == node.player_id else 0
 
     def backpropagation(self, node: Node, result: int):
         '''Updates the statistics for the nodes on the path from the root
@@ -146,19 +137,13 @@ class MCTS:
             result = self.simulation(new_node) # SIMULATION
             self.backpropagation(new_node, result) # BACKPROPAGATION
 
-    def train(self, node: Node, iterations: int, num_threads):
+    def train(self, root: Node, iterations: int):
         '''Trains the tree adn saves the results in a .json file'''
 
-        thread_pool = []
-        for _ in range(num_threads):
-            t = Thread(target=self.function_for_training, args=(node, iterations))
-            t.start()
-            thread_pool.append(t)
-        
-        for t in thread_pool: t.join()
-
+        self.function_for_training(root, iterations)
         tree = dict()
-        self.save_tree(tree, node)
+        item_root = self.save_tree(tree, root)
+        tree[self.functions.hash_function(root.piece_to_move, root.state.get_board_status())] = item_root
 
         print(len(tree.keys()))
         print(len(tree.values()))
@@ -166,21 +151,32 @@ class MCTS:
         with open('./MCTS/database.json', 'w') as fp:
             json.dump(tree, fp)
     
-    def save_tree(self, tree: dict, root: Node):
+    def save_tree(self, tree: dict, node: Node):
         '''Saves the nodes created in a dictionary'''
 
-        if not root.children:
-            return
+        if not node.children:
+            return {
+                'piece_to_move': node.piece_to_move,
+                'place_where_move': node.place_where_move,
+                'score': node.wins/node.visits,
+                'end_node': node.end_point,
+                'children': []
+            }
 
         children = []
-        for element in root.children:
-            self.save_tree(tree, element)
-            item = {
-                'id': element.hash_function(), # Each element can be distinguish by its hash 
-                'piece_to_move': element.piece_to_move,
-                'place_where_move': element.place_where_move,
-                'score': element.wins/element.visits,
-                'end_node': element.end_point
-            }
-            children.append(item)
-        tree[root.hash_function()] = children
+        for element in node.children:
+            child = self.save_tree(tree, element)
+            hash = self.functions.hash_function(element.piece_to_move, element.state.get_board_status())
+            tree[hash] = child
+            children.append(hash)
+
+        hash = self.functions.hash_function(node.piece_to_move, node.state.get_board_status())
+        item = {
+            'piece_to_move': node.piece_to_move,
+            'place_where_move': node.place_where_move,
+            'score': node.wins/node.visits,
+            'end_node': node.end_point,
+            'children': children
+        }
+
+        return item

@@ -1,3 +1,4 @@
+import numpy as np
 from .quartoTrain import *
 
 class UsefulFunctions(object):
@@ -6,15 +7,20 @@ class UsefulFunctions(object):
     def __init__(self) -> None:
         pass
 
-    def equal_boards(self, board_1, board_2):
-        '''Compares two boards'''
+    def hash_function(self, piece, board):
+        '''Hash function to identify a node'''
 
-        for x in range(0, 3):
-            for j in range(0, 3):
-                if board_1[j, x] != board_2[j, x]:
-                    return False
+        return hash(str(piece) + np.array2string(board))
 
-        return True
+    def symmetries(self, board):
+        '''Defines four boards that could be equivalent to the original one'''
+
+        rotate_90_clockwise = np.rot90(board)
+        rotate_90_counter_clockwise = np.rot90(board, k=3)
+        reflect_horizontal = np.fliplr(board)
+        reflect_vertical = np.flipud(board)
+
+        return rotate_90_clockwise, rotate_90_counter_clockwise, reflect_horizontal, reflect_vertical
 
     def free_pieces_and_places(self, state: QuartoTrain):
         '''Returns all possible free pieces and places for the current state'''

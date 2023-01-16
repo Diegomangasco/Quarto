@@ -7,6 +7,6 @@ root = Node(board, 1, -1, -1)
 
 mcts = MCTS()
 
-mcts.train(root, 300, 1)
+mcts.train(root, 300)
 
 

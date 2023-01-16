@@ -37,7 +37,7 @@ class QuartoTrain(object):
         self.__pieces.append(PieceTrain(True, True, False, True))  # 13
         self.__pieces.append(PieceTrain(True, True, True, False))  # 14
         self.__pieces.append(PieceTrain(True, True, True, True))  # 15
-        self.__current_player = 0
+        self._current_player = 0
         self.__selected_piece_index = -1
         self.__selected_place_index = ()
 
@@ -112,7 +112,7 @@ class QuartoTrain(object):
                         noncolor_values) == self.BOARD_SIDE or len(
                             hollow_values) == self.BOARD_SIDE or len(
                                 circle_values) == self.BOARD_SIDE:
-                return self.__current_player
+                return self._current_player
         return -1
 
     def __check_vertical(self):
@@ -148,7 +148,7 @@ class QuartoTrain(object):
                         noncolor_values) == self.BOARD_SIDE or len(
                             hollow_values) == self.BOARD_SIDE or len(
                                 circle_values) == self.BOARD_SIDE:
-                return self.__current_player
+                return self._current_player
         return -1
 
     def __check_diagonal(self):
@@ -184,7 +184,7 @@ class QuartoTrain(object):
                     low_values
                 ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
                     hollow_values) == self.BOARD_SIDE or len(circle_values) == self.BOARD_SIDE:
-            return self.__current_player
+            return self._current_player
         high_values = []
         coloured_values = []
         solid_values = []
@@ -219,7 +219,7 @@ class QuartoTrain(object):
                     low_values
                 ) == self.BOARD_SIDE or len(noncolor_values) == self.BOARD_SIDE or len(
                     hollow_values) == self.BOARD_SIDE or len(circle_values) == self.BOARD_SIDE:
-            return self.__current_player
+            return self._current_player
         return -1
 
     def check_winner(self) -> int:
@@ -250,7 +250,7 @@ class QuartoTrain(object):
             while winner < 0 and not self.check_finished():
                 piece = random.choice(free_pieces)
                 _ = self.select(piece)
-                self.__current_player = (self.__current_player + 1) % self.MAX_PLAYERS
+                self._current_player = (self._current_player + 1) % self.MAX_PLAYERS
                 place = random.choice(free_places)
                 _ = self.place(place[0], place[1])
                 free_pieces.remove(self.__selected_piece_index)  

@@ -20,7 +20,7 @@ class API():
         winner = state.check_winner()
         return winner == our_player
 
-    def load_MCTS(self):
+    def load_MCTS(self) -> dict:
         '''Returns the MC tree'''
 
         with open('./MCTS/database.json', 'r') as fp:
@@ -31,10 +31,14 @@ class API():
     def choose_node_using_MCTS(self, tree: dict, state: QuartoTrain, piece: int, new_piece=None, restricted=False):
         '''Chooses a node using the MCTS trained'''
 
-        hash = self.mcts.functions.hash_function(piece, state.get_board_status())
-        if hash not in tree.keys():
+        hashes = [self.mcts.functions.hash_function(piece, board) for board in self.mcts.functions.symmetries(state.get_board_status())]
+        hashes.append(self.mcts.functions.hash_function(piece, state.get_board_status()))
+        found = [hash for hash in hashes if hash in tree.keys()]
+        
+        if not found:
             return None
         else:
+            hash = max(found, key=lambda x: tree[x]['score'])
             ids = tree[hash]['children']
             piece_place_score = [(tree[id]['piece_to_move'], tree[id]['place_where_move'], tree[id]['score']) for id in ids]
             if restricted == False:

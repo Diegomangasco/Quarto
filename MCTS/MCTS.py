@@ -165,7 +165,6 @@ class MCTS:
             tree[hash] = child
             children.append(hash)
 
-        hash = self.functions.hash_function(node.piece_to_move, node.state.get_board_status())
         item = {
             'piece_to_move': node.piece_to_move,
             'place_where_move': node.place_where_move,

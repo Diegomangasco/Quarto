@@ -5,6 +5,7 @@ from MCTS.API import *
 from MCTS.quartoTrain import *
 import random
 import matplotlib.pyplot as plt
+import functools as func
 
 class RLPlayer(quarto.Player):
     '''Defines a Reinforcement Learning player'''
@@ -42,7 +43,7 @@ class RLPlayer(quarto.Player):
     def learn(self) -> None:
         target = 0
         for hash, reward in reversed(self._state_history):
-            self._G[tuple(hash)] = self._G[tuple(hash)] + self._alpha * (target - self._G[tuple(hash)])
+            self._G[hash] = self._G[hash] + self._alpha * (target - self._G[hash])
             target += reward
         self._state_history = []
         # self._random_factor -= 10e-5  # decrease random factor each episode of play
@@ -51,8 +52,13 @@ class RLPlayer(quarto.Player):
         '''Trains the RL agent against a Random Player'''
 
         number_win_local = 0
+        random_counter = 0
+        all_moves = 0
         tree = self._api_MCTS.load_MCTS()
+        tree = {int(k): v for k,v in tree.items()}
+
         for _ in range(iterations):
+            print('Iteration: ', _)
             lead = copy.deepcopy(root)
             our_player = 0
             lead._current_player = random.choice([0, 1])
@@ -61,12 +67,15 @@ class RLPlayer(quarto.Player):
 
             while not self._api_MCTS.is_terminal(lead):
 
+                all_moves += 1
+
                 if our_player == lead._current_player: # Agent chooses, Random places
 
                     piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece)
 
                     if not piece_place_score:
                         # Not present in our MCTS database
+                        random_counter += 1
                         free_pieces, free_places = self._api_MCTS.mcts.functions.free_pieces_and_places(lead)
                         piece = random.choice(free_pieces)
                         flag_random = True
@@ -85,6 +94,7 @@ class RLPlayer(quarto.Player):
 
                     if not place_score:
                         # Not present in our MCTS database
+                        random_counter += 1
                         place = random.choice(free_places)
                         flag_random = True
                     else:
@@ -118,6 +128,7 @@ class RLPlayer(quarto.Player):
 
 
         # Print graph statistics
+        print('Random factor: ', (random_counter/all_moves)*100)
         plt.semilogy(self._epochs, self._wins, "b")
         plt.show()
             

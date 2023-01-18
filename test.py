@@ -2,16 +2,17 @@ from MCTS.quartoTrain import *
 from MCTS.MCTS import *
 from RLAgent.RLAgent import *
 import numpy as np
+import hashlib as hash
 
 board = QuartoTrain()
 mcts = MCTS()
-rlagent = RLPlayer(board)
+rlagent = RLTools()
 
 root = Node(board, 1, -1, -1)
 
-# mcts.train(root, 3000)
-#print(board.get_board_status())
-#print(hash(str(-1) + np.array2string(board.get_board_status())))
+# print('Train MCTS with 100000 iterations')
+# mcts.train(root, 100000)
+print('Train RL agent with 5000 iterations')
 rlagent.train(board)
 
 

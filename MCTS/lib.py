@@ -1,4 +1,5 @@
 import numpy as np
+import hashlib as hash
 from .quartoTrain import *
 
 class UsefulFunctions(object):
@@ -10,7 +11,9 @@ class UsefulFunctions(object):
     def hash_function(self, piece, board):
         '''Hash function to identify a node'''
 
-        return hash(str(piece) + np.array2string(board))
+        string = str(piece) + np.array2string(board)
+        string = string.encode('utf-8')
+        return hash.sha1(string).hexdigest()
 
     def symmetries(self, board):
         '''Defines four boards that could be equivalent to the original one'''

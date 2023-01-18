@@ -251,10 +251,11 @@ class QuartoTrain(object):
                 piece = random.choice(free_pieces)
                 _ = self.select(piece)
                 self._current_player = (self._current_player + 1) % self.MAX_PLAYERS
-                place = random.choice(free_places)
+                place = tuple(random.choice(free_places))
                 _ = self.place(place[0], place[1])
-                free_pieces.remove(self.__selected_piece_index)  
-                free_places.remove(self.__selected_place_index)
+                if single == False:
+                    free_pieces.remove(self.__selected_piece_index)  
+                    free_places.remove(self.__selected_place_index)
                 winner = self.check_winner()
                 if single == True:
                     break

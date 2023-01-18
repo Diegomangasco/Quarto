@@ -33,7 +33,7 @@ class API():
 
         hashes = [self.mcts.functions.hash_function(piece, board) for board in self.mcts.functions.symmetries(state.get_board_status())]
         hashes.append(self.mcts.functions.hash_function(piece, state.get_board_status()))
-        found = [hash for hash in hashes if hash in tree.keys()]
+        found = [hash for hash in hashes if hash in tree.keys() and tree[hash]['children']]
         
         if not found:
             return None

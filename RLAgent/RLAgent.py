@@ -5,28 +5,34 @@ from MCTS.API import *
 from MCTS.quartoTrain import *
 import random
 import matplotlib.pyplot as plt
-import functools as func
 
 class RLPlayer(quarto.Player):
     '''Defines a Reinforcement Learning player'''
 
-    def __init__(self, quarto, alpha=0.15) -> None:
+    def __init__(self, quarto) -> None:
         super().__init__(quarto)
-        self._state_history = []  # state, reward
-        self._alpha = alpha
-        # self._random_factor = random_factor
-        self._G = {}
-        self._api_MCTS = API()
-        self._epochs = []
-        self._wins = []
+        self._quarto = quarto
+        self._agent = RLTools()
 
     def choose_piece(self) -> int:
-    # If found in _G, otherwise random
+    # If found in _G or in MCTS, otherwise random
        pass
 
     def place_piece(self) -> tuple[int, int]:
-       # If found in _G, otherwise random
+       # If found in _G or in MCTS, otherwise random
        pass
+
+class RLTools():
+    '''Defines a Reinforcement Learning set of tools'''
+
+    def __init__(self, alpha=0.15, interval=50) -> None:
+        self._state_history = []  # state, reward
+        self._alpha = alpha
+        self._G = {}
+        self._api_MCTS = API()
+        self._epochs = []
+        self._win_percentages = []
+        self._interval = interval
 
     def init_reward(self, hash, piece: int) -> float:
         '''Inits reward for a certain state'''
@@ -41,7 +47,7 @@ class RLPlayer(quarto.Player):
         self._state_history.append((hash, reward))
 
     def learn(self) -> None:
-        target = 0
+        target = 0.0
         for hash, reward in reversed(self._state_history):
             self._G[hash] = self._G[hash] + self._alpha * (target - self._G[hash])
             target += reward
@@ -55,10 +61,8 @@ class RLPlayer(quarto.Player):
         random_counter = 0
         all_moves = 0
         tree = self._api_MCTS.load_MCTS()
-        tree = {int(k): v for k,v in tree.items()}
 
         for _ in range(iterations):
-            print('Iteration: ', _)
             lead = copy.deepcopy(root)
             our_player = 0
             lead._current_player = random.choice([0, 1])
@@ -68,15 +72,15 @@ class RLPlayer(quarto.Player):
             while not self._api_MCTS.is_terminal(lead):
 
                 all_moves += 1
+                free_pieces, free_places = self._api_MCTS.mcts.functions.free_pieces_and_places(lead)
 
                 if our_player == lead._current_player: # Agent chooses, Random places
-
+                    
                     piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece)
 
                     if not piece_place_score:
                         # Not present in our MCTS database
                         random_counter += 1
-                        free_pieces, free_places = self._api_MCTS.mcts.functions.free_pieces_and_places(lead)
                         piece = random.choice(free_pieces)
                         flag_random = True
                     
@@ -87,18 +91,18 @@ class RLPlayer(quarto.Player):
                     place = random.choice(free_places) # Random player
 
                 else: # Random chooses, Agent places
-                    free_pieces, free_places = self._api_MCTS.mcts.functions.free_pieces_and_places(lead)
+
                     _piece = random.choice(free_pieces) # Random player
                     
-                    place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece, _piece, restricted=True)
+                    piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece, _piece, restricted=True)
 
-                    if not place_score:
+                    if not piece_place_score:
                         # Not present in our MCTS database
                         random_counter += 1
                         place = random.choice(free_places)
                         flag_random = True
                     else:
-                        place = place_score[1]
+                        place = piece_place_score[1]
                         flag_random = False
 
                     piece = _piece
@@ -121,14 +125,19 @@ class RLPlayer(quarto.Player):
                 number_win_local += 1 # If out player won
             self.learn() # Learn from experience
             # Get a history of number of steps taken to plot later
-            if _ % 50 == 0:
-                self._wins.append(number_win_local)
+            if _ % self._interval == 0:
+                print('Iteration: ', _)
+                self._win_percentages.append((number_win_local/self._interval)*100)
                 self._epochs.append(_)
                 number_win_local = 0
 
 
         # Print graph statistics
         print('Random factor: ', (random_counter/all_moves)*100)
-        plt.semilogy(self._epochs, self._wins, "b")
+        print('Win Rate against Random Player: ', sum(self._win_percentages)/len(self._win_percentages))
+        plt.xlabel('Epochs')
+        plt.ylabel('WinRate')
+        plt.plot(self._epochs, self._win_percentages)
+        plt.yticks(np.arange(0, max(self._win_percentages)+1, 10.0))
         plt.show()
             

@@ -6,8 +6,6 @@ import numpy as np
 from .quartoTrain import * 
 from .lib import *
 
-VIRTUAL_LOSS = 3.0
-
 class Node:
     '''Defines a Node for our tree'''
 
@@ -54,8 +52,12 @@ class Node:
     def select_child(self):
         '''Selects a child basing on the specific formula'''
 
-        return max(self.children, key=lambda x: x.wins/x.visits + math.sqrt(2*math.log(self.visits)/x.visits))
+        points = list()
+        for child in self.children:
+            points.append((child, 0.0)) if child.visits == 0 else points.append((child, child.wins/child.visits+math.sqrt(2*math.log(self.visits)/child.visits)))
     
+        return max(points, key=lambda x: x[1])[0]
+
     def update(self, result: int):
         '''Updates node statistics'''
 
@@ -116,11 +118,6 @@ class MCTS:
             node.update(result)
             node = node.parent
 
-    def best_child(self, node: Node):
-        '''Selects the child with the highest winner rate'''
-
-        return max(node.children, key=lambda x: x.wins/x.visits)
-
     def function_for_training(self, node: Node, iterations: int):
         '''The basic function for the training'''
 
@@ -153,7 +150,7 @@ class MCTS:
             return {
                 'piece_to_move': node.piece_to_move,
                 'place_where_move': node.place_where_move,
-                'score': node.wins/node.visits,
+                'score': node.wins/node.visits if node.visits!=0 else 0,
                 'end_node': node.end_point,
                 'children': []
             }
@@ -168,7 +165,7 @@ class MCTS:
         item = {
             'piece_to_move': node.piece_to_move,
             'place_where_move': node.place_where_move,
-            'score': node.wins/node.visits,
+            'score': node.wins/node.visits if node.visits!=0 else 0,
             'end_node': node.end_point,
             'children': children
         }

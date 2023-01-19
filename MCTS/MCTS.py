@@ -20,7 +20,6 @@ class Node:
         self.functions = UsefulFunctions()
         self.player_id = player_id
         self.end_point = end_point
-        self.virtual_loss = 0.0
 
     def already_has_child(self, new_state: QuartoTrain):
         '''Controls if the new node that would be created is already present in node's children'''

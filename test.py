@@ -1,6 +1,6 @@
 from MCTS.quartoTrain import *
 from MCTS.MCTS import *
-from RLAgent.RLAgent import *
+from RLPlayer.RLPlayer import *
 import numpy as np
 import hashlib as hash
 

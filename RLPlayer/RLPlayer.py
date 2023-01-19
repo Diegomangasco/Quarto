@@ -23,7 +23,7 @@ class RLPlayer(quarto.Player):
        pass
 
 class RLTools():
-    '''Defines a Reinforcement Learning set of tools'''
+    '''Defines a set of Reinforcement Learning tools'''
 
     def __init__(self, alpha=0.15, interval=50) -> None:
         self._state_history = []  # state, reward
@@ -82,11 +82,9 @@ class RLTools():
                         # Not present in our MCTS database
                         random_counter += 1
                         piece = random.choice(free_pieces)
-                        flag_random = True
                     
                     else:
                         piece = piece_place_score[0]
-                        flag_random = False
                     
                     place = random.choice(free_places) # Random player
 
@@ -100,10 +98,8 @@ class RLTools():
                         # Not present in our MCTS database
                         random_counter += 1
                         place = random.choice(free_places)
-                        flag_random = True
                     else:
                         place = piece_place_score[1]
-                        flag_random = False
 
                     piece = _piece
 
@@ -111,11 +107,7 @@ class RLTools():
                 hash = self._api_MCTS.mcts.functions.hash_function(piece, new_state.get_board_status())
 
                 if hash not in self._G.keys():
-                    if flag_random:
-                        reward = self.init_reward(hash, piece)
-                    else:
-                        reward = piece_place_score[2]
-                        self._G[hash] = reward
+                    reward = self.init_reward(hash, piece)
 
                 self.update_state_history(hash, reward)
                 lead = new_state

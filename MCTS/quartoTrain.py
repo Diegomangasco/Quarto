@@ -15,11 +15,11 @@ class QuartoTrain(object):
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
 
-    def __init__(self) -> None:
-        self.reset()
+    def __init__(self, board, current_player, piece, place) -> None:
+        self.reset(board, current_player, piece, place)
 
-    def reset(self):
-        self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
+    def reset(self, board, current_player, piece, place):
+        self.__board = np.copy(board)
         self.__pieces = []
         self.__pieces.append(PieceTrain(False, False, False, False))  # 0
         self.__pieces.append(PieceTrain(False, False, False, True))  # 1
@@ -37,9 +37,9 @@ class QuartoTrain(object):
         self.__pieces.append(PieceTrain(True, True, False, True))  # 13
         self.__pieces.append(PieceTrain(True, True, True, False))  # 14
         self.__pieces.append(PieceTrain(True, True, True, True))  # 15
-        self._current_player = 0
-        self.__selected_piece_index = -1
-        self.__selected_place_index = ()
+        self._current_player = current_player
+        self.__selected_piece_index = piece
+        self.__selected_place_index = place
 
     def get_board_status(self) -> np.ndarray:
         '''

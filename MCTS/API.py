@@ -1,6 +1,6 @@
 import json
 from .quartoTrain import *
-from .MCTS import *
+from .MCTSTools import *
 
 class API():
     '''API to extract informations from the trained MCTS'''

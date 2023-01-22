@@ -8,13 +8,6 @@ class UsefulFunctions(object):
     def __init__(self) -> None:
         pass
 
-    def hash_function(self, piece, board):
-        '''Hash function to identify a node'''
-
-        string = str(piece) + np.array2string(board)
-        string = string.encode('utf-8')
-        return hash.sha1(string).hexdigest()
-
     def symmetries(self, board):
         '''Defines four boards that could be equivalent to the original one'''
 
@@ -25,25 +18,36 @@ class UsefulFunctions(object):
 
         return rotate_90_clockwise, rotate_90_counter_clockwise, reflect_horizontal, reflect_vertical
 
-    def free_pieces_and_places(self, state: QuartoTrain):
-        '''Returns all possible free pieces and places for the current state'''
+    def free_places(self, state: QuartoTrain):
+        '''Returns all possible free places for the current state'''
+
+        board = state.get_board_status()
+        free_places = [(i, j) for i in range(0, 4) for j in range(0, 4) if board[j, i] == -1]
+        
+        return free_places
+            
+    def free_pieces(self, state: QuartoTrain):
+        '''Returns all possible free pieces for the current state'''
 
         board = state.get_board_status()
         free_pieces = [piece for piece in range(0, 16) if piece not in board]
-        free_places = [(i, j) for i in range(0, 4) for j in range(0, 4) if board[j, i] == -1]
         
-        return free_pieces, free_places
+        return free_pieces
 
-    def do_one_random_step(self, state: QuartoTrain):
-        '''Does one random game beginning on the current state to create another one'''
-
-        free_pieces, free_places = self.free_pieces_and_places(state)
-        piece, place = state.run(free_pieces, free_places) # Run only one move to create a new state
-        return state, piece, place
-
-    def simulate_game(self, state: QuartoTrain):
+    def simulate_game(self, state: QuartoTrain, player_id: int):
         '''Simulates a game untill the end'''
 
-        free_pieces, free_places = self.free_pieces_and_places(state)
-        winner = state.run(free_pieces, free_places, single=False)
-        return winner
+        invert_reward = True
+        while True:
+            if state.check_finished() or state.check_winner() != -1:
+                if state.check_winner() == player_id:
+                    reward = 1  
+                elif state.check_winner() == -1:
+                    reward = .5
+                else:
+                    reward = 0 
+                return 1 - reward if invert_reward else reward
+            free_pieces = self.free_pieces(state)
+            free_places = self.free_places(state)
+            state.run(free_pieces, free_places)
+            invert_reward = not invert_reward

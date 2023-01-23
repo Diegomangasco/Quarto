@@ -1,5 +1,4 @@
 import numpy as np
-import hashlib as hash
 from .quartoTrain import *
 
 class UsefulFunctions(object):
@@ -22,7 +21,7 @@ class UsefulFunctions(object):
         '''Returns all possible free places for the current state'''
 
         board = state.get_board_status()
-        free_places = [(i, j) for i in range(0, 4) for j in range(0, 4) if board[j, i] == -1]
+        free_places = [(j, i) for i in range(0, 4) for j in range(0, 4) if board[j, i] == -1]
         
         return free_places
             
@@ -37,7 +36,6 @@ class UsefulFunctions(object):
     def simulate_game(self, state: QuartoTrain, player_id: int):
         '''Simulates a game untill the end'''
 
-        invert_reward = True
         while True:
             if state.check_finished() or state.check_winner() != -1:
                 if state.check_winner() == player_id:
@@ -46,8 +44,7 @@ class UsefulFunctions(object):
                     reward = .5
                 else:
                     reward = 0 
-                return 1 - reward if invert_reward else reward
+                return reward
             free_pieces = self.free_pieces(state)
             free_places = self.free_places(state)
             state.run(free_pieces, free_places)
-            invert_reward = not invert_reward

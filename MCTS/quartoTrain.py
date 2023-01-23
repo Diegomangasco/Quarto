@@ -15,10 +15,10 @@ class QuartoTrain(object):
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
 
-    def __init__(self, board, current_player, piece, place) -> None:
-        self.reset(board, current_player, piece, place)
+    def __init__(self, board, current_player) -> None:
+        self.reset(board, current_player)
 
-    def reset(self, board, current_player, piece, place):
+    def reset(self, board, current_player):
         self.__board = np.copy(board)
         self.__pieces = []
         self.__pieces.append(PieceTrain(False, False, False, False))  # 0
@@ -38,8 +38,7 @@ class QuartoTrain(object):
         self.__pieces.append(PieceTrain(True, True, True, False))  # 14
         self.__pieces.append(PieceTrain(True, True, True, True))  # 15
         self._current_player = current_player
-        self.__selected_piece_index = piece
-        self.__selected_place_index = place
+        self.__selected_piece_index = -1
 
     def get_board_status(self) -> np.ndarray:
         '''
@@ -51,11 +50,6 @@ class QuartoTrain(object):
         '''Get the current selected piece'''
 
         return self.__selected_piece_index
-
-    def get_selected_place(self):
-        '''Get the current place choosen'''
-
-        return self.__selected_place_index
      
     def select(self, pieceIndex: int) -> bool:
         '''
@@ -72,7 +66,6 @@ class QuartoTrain(object):
         '''
         if self.__placeable(x, y):
             self.__board[y, x] = self.__selected_piece_index
-            self.__selected_place_index = (x, y)
             return True
         return False
 
@@ -252,7 +245,7 @@ class QuartoTrain(object):
                 _ = self.select(piece)
                 self._current_player = (self._current_player + 1) % self.MAX_PLAYERS
                 place = tuple(random.choice(free_places))
-                _ = self.place(place[0], place[1])
+                _ = self.place(place[1], place[0])
                 if single == False:
                     free_pieces.remove(self.__selected_piece_index)  
                     free_places.remove(self.__selected_place_index)

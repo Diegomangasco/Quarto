@@ -25,11 +25,10 @@ class RLPlayer(quarto.Player):
 class RLTools():
     '''Defines a set of Reinforcement Learning tools'''
 
-    def __init__(self, alpha=0.15, interval=50) -> None:
+    def __init__(self, quarto, alpha=0.15, interval=50) -> None:
         self._state_history = []  # state, reward
         self._alpha = alpha
         self._G = {}
-        self._api_MCTS = API()
         self._epochs = []
         self._win_percentages = []
         self._interval = interval
@@ -58,53 +57,16 @@ class RLTools():
         '''Trains the RL agent against a Random Player'''
 
         number_win_local = 0
-        random_counter = 0
-        all_moves = 0
-        tree = self._api_MCTS.load_MCTS()
 
         for _ in range(iterations):
             lead = copy.deepcopy(root)
             our_player = 0
             lead._current_player = random.choice([0, 1])
+            mcts = MCTS(our_player)
 
-            piece = -1
+            while lead.check_winner() != -1 or lead.check_finished():
 
-            while not self._api_MCTS.is_terminal(lead):
-
-                all_moves += 1
-                free_pieces, free_places = self._api_MCTS.mcts.functions.free_pieces_and_places(lead)
-
-                if our_player == lead._current_player: # Agent chooses, Random places
-                    
-                    piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece)
-
-                    if not piece_place_score:
-                        # Not present in our MCTS database
-                        random_counter += 1
-                        piece = random.choice(free_pieces)
-                    
-                    else:
-                        piece = piece_place_score[0]
-                    
-                    place = random.choice(free_places) # Random player
-
-                else: # Random chooses, Agent places
-
-                    _piece = random.choice(free_pieces) # Random player
-                    
-                    piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece, _piece, restricted=True)
-
-                    if not piece_place_score:
-                        # Not present in our MCTS database
-                        random_counter += 1
-                        place = random.choice(free_places)
-                    else:
-                        place = piece_place_score[1]
-
-                    piece = _piece
-
-                new_state = self._api_MCTS.create_state(lead, piece, place)
-                hash = self._api_MCTS.mcts.functions.hash_function(piece, new_state.get_board_status())
+                # TODO
 
                 if hash not in self._G.keys():
                     reward = self.init_reward(hash, piece)
@@ -125,7 +87,6 @@ class RLTools():
 
 
         # Print graph statistics
-        print('Random factor: ', (random_counter/all_moves)*100)
         print('Win Rate against Random Player: ', sum(self._win_percentages)/len(self._win_percentages))
         plt.xlabel('Epochs')
         plt.ylabel('WinRate')

@@ -4,34 +4,25 @@ from .MCTSTools import *
 class MCTSPlayer(quarto.Player):
     '''Defines a MonteCarlo Tree Search Player'''
 
-    def __init__(self, quarto, iterations, player_id) -> None:
+    def __init__(self, quarto, player_id, iterations=50, mcts=None) -> None:
         super().__init__(quarto)
-        self._mcts = MCTS()
-        self._iterations = iterations
+        self._mcts = MCTS(player_id)
         self._player_id = player_id
-
-    def get_place(self, state, piece):
-        for x in range(4):
-            for y in range(4):
-                if piece == state[x, y]:
-                    return (x, y)
+        self._iterations = iterations
+        self._last_state = None
 
     def choose_piece(self) -> int:
-        state = self.get_game().get_board_status()
-        player = self.get_game().get_current_player()
-        piece = self.get_game().get_selected_piece()
-        place = self.get_place(state, piece) if piece != -1 else -1
-        quartotrain = QuartoTrain(state, player, piece, place)
-        root = Node(quartotrain, self._player_id, piece, place)
-        child = self._mcts.do_rollout(root, self._iterations)
-        return child._piece_to_move
+        if self._last_state == None:
+            return random.randint(0, 15)
+        else:
+            print(self._last_state._piece_to_move_next)
+            return self._last_state._piece_to_move_next
 
     def place_piece(self) -> tuple[int, int]:
         state = self.get_game().get_board_status()
-        player = self.get_game().get_current_player()
         piece = self.get_game().get_selected_piece()
-        place = self.get_place(state, piece) if piece != -1 else -1
-        quartotrain = QuartoTrain(state, player, piece, place)
-        root = Node(quartotrain, self._player_id, piece, place)
+        quartotrain = QuartoTrain(state, self._player_id)
+        root = Node(quartotrain, piece)
         child = self._mcts.do_rollout(root, self._iterations)
-        return child._place_where_move
+        self._last_state = child
+        return child._place_where_move_current

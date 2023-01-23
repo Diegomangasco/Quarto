@@ -16,12 +16,17 @@ class RandomPlayer(quarto.Player):
 
 
 wins = 0
-games = 20
+games = 50
 
 for i in range(games):
     print('Game number: ', i+1)
     game = quarto.Quarto()
-    game.set_players((RandomPlayer(game), MCTSPlayer(game, 100, 1)))
+    if i%2 != 0:
+        our_player = MCTSPlayer(game, 0, iterations=90)
+        game.set_players((our_player, RandomPlayer(game)))
+    else:
+        our_player = MCTSPlayer(game, 1, iterations=90)
+        game.set_players((RandomPlayer(game), our_player))
     winner = game.run()
     if winner == 1:
         wins += 1

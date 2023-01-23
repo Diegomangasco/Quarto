@@ -302,7 +302,7 @@ class Quarto(object):
             piece_ok = False
             self._current_player = (
                 self._current_player + 1) % self.MAX_PLAYERS
-            self.print()
+            #self.print()
             while not piece_ok:
                 x, y = self.__players[self._current_player].place_piece()
                 piece_ok = self.place(x, y)

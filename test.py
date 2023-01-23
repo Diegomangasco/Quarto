@@ -28,7 +28,7 @@ for i in range(games):
         our_player = MCTSPlayer(game, 1, iterations=90)
         game.set_players((RandomPlayer(game), our_player))
     winner = game.run()
-    if winner == 1:
+    if winner == our_player._player_id:
         wins += 1
     print('###############')
 

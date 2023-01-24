@@ -28,6 +28,9 @@ class GATools():
         self._games_to_play = games_to_play
         self._random_factor = random_factor
 
+    
+                
+
     def game(self, our_player, board, genome):
         '''Simulate a certain number of games'''
         pass

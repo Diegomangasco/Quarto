@@ -51,6 +51,12 @@ class QuartoTrain(object):
 
         return self.__selected_piece_index
 
+    def get_piece_charachteristics(self, index: int) -> Piece:
+        '''
+        Gets charachteristics of a piece (index-based)
+        '''
+        return copy.deepcopy(self.__pieces[index])
+
     def get_current_player(self) -> int:
         '''
         Gets the current player

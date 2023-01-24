@@ -15,10 +15,10 @@ class QuartoTrain(object):
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
 
-    def __init__(self, board, current_player) -> None:
-        self.reset(board, current_player)
+    def __init__(self, board, piece, current_player) -> None:
+        self.reset(board, piece, current_player)
 
-    def reset(self, board, current_player):
+    def reset(self, board, piece, current_player):
         self.__board = np.copy(board)
         self.__pieces = []
         self.__pieces.append(PieceTrain(False, False, False, False))  # 0
@@ -38,7 +38,7 @@ class QuartoTrain(object):
         self.__pieces.append(PieceTrain(True, True, True, False))  # 14
         self.__pieces.append(PieceTrain(True, True, True, True))  # 15
         self._current_player = current_player
-        self.__selected_piece_index = -1
+        self.__selected_piece_index = piece
 
     def get_board_status(self) -> np.ndarray:
         '''
@@ -50,6 +50,12 @@ class QuartoTrain(object):
         '''Get the current selected piece'''
 
         return self.__selected_piece_index
+
+    def get_current_player(self) -> int:
+        '''
+        Gets the current player
+        '''
+        return self._current_player
      
     def select(self, pieceIndex: int) -> bool:
         '''
@@ -235,25 +241,16 @@ class QuartoTrain(object):
                     return False
         return True
 
-    def run(self, free_pieces: list, free_places: list, single=True) -> int:
+    def run(self, free_pieces: list, free_places: list, first_round=False) -> int:
             '''
             Run the game one or multiple times
             '''
-            winner = -1
-            while winner < 0 and not self.check_finished():
+            if first_round == False:
                 piece = random.choice(free_pieces)
                 _ = self.select(piece)
                 self._current_player = (self._current_player + 1) % self.MAX_PLAYERS
-                place = tuple(random.choice(free_places))
-                _ = self.place(place[1], place[0])
-                if single == False:
-                    free_pieces.remove(self.__selected_piece_index)  
-                    free_places.remove(self.__selected_place_index)
-                winner = self.check_winner()
-                if single == True:
-                    break
+            _ = self.select(free_pieces[0])
+            place = tuple(random.choice(free_places))
+            _ = self.place(place[1], place[0])
             
-            if single == True:
-                return piece, place
-            else:
-                return winner
+            return free_pieces[0] if first_round == True else piece, place

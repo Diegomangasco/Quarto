@@ -16,22 +16,23 @@ class RandomPlayer(quarto.Player):
 
 
 wins = 0
-games = 50
+draws = 0
+games = 10
+mcts = None
 
 for i in range(games):
     print('Game number: ', i+1)
     game = quarto.Quarto()
-    if i%2 != 0:
-        our_player = MCTSPlayer(game, 0, iterations=90)
-        game.set_players((our_player, RandomPlayer(game)))
-    else:
-        our_player = MCTSPlayer(game, 1, iterations=90)
-        game.set_players((RandomPlayer(game), our_player))
+    player = MCTSPlayer(game, 0, iterations=30)
+    game.set_players((player, RandomPlayer(game)))
     winner = game.run()
-    if winner == our_player._player_id:
+    if winner == -1:
+        draws += 1
+    if winner == 0:
         wins += 1
     print('###############')
 
 print('Win rate: ', 100*wins/games)
+print('Draw rate: ', 100*draws/games)
 
 

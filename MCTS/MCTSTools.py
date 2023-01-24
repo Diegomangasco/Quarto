@@ -10,9 +10,8 @@ from .utils import *
 class Node:
     '''Defines a Node for our tree'''
 
-    def __init__(self, state: QuartoTrain, piece_to_move_next, place_where_move_current=None, end_point=False):
+    def __init__(self, state: QuartoTrain, place_where_move_current=None, end_point=False):
         self._state = state
-        self._piece_to_move_next = piece_to_move_next
         self._place_where_move_current = place_where_move_current
         self._wins = 0
         self._visits = 0
@@ -20,7 +19,7 @@ class Node:
         self._end_point = end_point
 
     def __hash__(self) -> int:
-        t = str(self._piece_to_move_next) + np.array2string(self._state.get_board_status())
+        t = str(self._state.get_selected_piece()) + np.array2string(self._state.get_board_status())
         val = int(hashlib.sha1(t.encode('utf-8')).hexdigest(), 32)
         return val
 
@@ -40,11 +39,42 @@ class Node:
 
         return False
 
-    def update(self, result: int):
+    def update(self, reward: int):
         '''Updates node statistics'''
 
         self._visits += 1
-        self._wins += result # result can be +1 (win) or 0 (draw or loose)
+        self._wins += reward # result can be +1 (win) or 0 (draw or loose)
+
+    def reward(self, player_id):
+
+        player_who_last_moved = 1 - self._state.get_current_player()
+
+        # 1 if plays second, 0 if plays first
+        agent_position = player_id
+
+        if player_who_last_moved == agent_position and 1 - self._state.check_winner() == agent_position:
+            # agent won
+            return 1
+        elif player_who_last_moved == 1 - agent_position and 1 - self._state.check_winner() == 1 - agent_position:
+            # agent lost
+            return 0
+        elif self._state.check_winner() == -1:
+            return 0.5
+
+    def find_random_child(self):
+        free_places = self._functions.free_places(self._state)
+        place = random.choice(free_places)
+        new_quarto = copy.deepcopy(self._state)
+        new_quarto.place(place[1], place[0])
+        if new_quarto.check_finished() or new_quarto.check_winner() != -1:
+            end_point = True
+        else:
+            free_pieces = self._functions.free_pieces(new_quarto)
+            piece = random.choice(free_pieces)
+            new_quarto.select(piece)
+            end_point = False
+        new_quarto._current_player = (new_quarto._current_player + 1) % new_quarto.MAX_PLAYERS
+        return Node(new_quarto, place, end_point)
 
 class MCTS:
     '''Defines the function to build a MCTS'''
@@ -62,7 +92,6 @@ class MCTS:
             points.append((child, child._wins/child._visits+math.sqrt(2*math.log(node._visits)/child._visits)))
     
         return max(points, key=lambda x: x[1])[0]
-
 
     def traverse_tree(self, node: Node):
         '''Traverses the tree with recursion by using the upper confidence bound for tree traversal until 
@@ -89,15 +118,17 @@ class MCTS:
         free_places = self._functions.free_places(node._state)
         children = []
         for y, x in free_places:
-            board = node._state.get_board_status()
-            board[y, x] = node._piece_to_move_next
-            quarto = QuartoTrain(board, node._state._current_player)
+            quarto = copy.deepcopy(node._state)
+            quarto.place(x, y)
             if quarto.check_finished() or quarto.check_winner() != -1:
-                children.append(Node(quarto, -1, (x, y),  True))
+                children.append(Node(copy.deepcopy(quarto), (x, y),  True))
             else:
                 left_pieces = self._functions.free_pieces(quarto)
                 for piece in left_pieces:
-                    child = Node(quarto, piece, (x, y))
+                    new_quarto = copy.deepcopy(quarto)
+                    new_quarto.select(piece)
+                    new_quarto._current_player = (new_quarto._current_player + 1) % new_quarto.MAX_PLAYERS
+                    child = Node(new_quarto, (x, y))
                     children.append(child)
 
         self._node_regystry[node] = children
@@ -106,10 +137,11 @@ class MCTS:
     def simulation(self, node: Node):
         '''Simulates the game from the given state to the end'''
         
-        if self._node_regystry[node] == None:
-            return self._functions.simulate_game(copy.deepcopy(node._state), self._player_id)
-        child = random.choice(self._node_regystry[node])
-        return self._functions.simulate_game(copy.deepcopy(child._state), self._player_id)
+        while True:
+            if node._end_point:
+                reward = node.reward(self._player_id)
+                return reward
+            node = node.find_random_child()
 
     def backpropagation(self, reward: int, path: list):
         '''Updates the statistics for the nodes on the path from the root
@@ -117,7 +149,7 @@ class MCTS:
 
         for node in reversed(path):
             node.update(reward)
-            result = 1 - reward
+            reward = 1 - reward
 
     def best_child(self, node: Node):
         '''Choose the most promising child'''
@@ -137,8 +169,9 @@ class MCTS:
 
         for _ in range(iterations):
             path = self.traverse_tree(node) # SELECTION
-            self.expand_tree(path[-1]) # EXPANSION
-            reward = self.simulation(path[-1]) # SIMULATION
+            leaf = path[-1]
+            self.expand_tree(leaf) # EXPANSION
+            reward = self.simulation(leaf) # SIMULATION
             self.backpropagation(reward, path) # BACKPROPAGATION
 
     def do_rollout(self, root: Node, iterations: int):

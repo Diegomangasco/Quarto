@@ -33,8 +33,12 @@ class UsefulFunctions(object):
         
         return free_pieces
 
-    def simulate_game(self, state: QuartoTrain, player_id: int):
+    def simulate_game(self, state: QuartoTrain, player_id: int, piece: int):
         '''Simulates a game untill the end'''
+
+        free_pieces = self.free_pieces(state)
+        free_places = self.free_places(state)
+        first_round = True
 
         while True:
             if state.check_finished() or state.check_winner() != -1:
@@ -45,6 +49,10 @@ class UsefulFunctions(object):
                 else:
                     reward = 0 
                 return reward
-            free_pieces = self.free_pieces(state)
-            free_places = self.free_places(state)
-            state.run(free_pieces, free_places)
+            if first_round == True:
+                piece, place = state.run([piece], free_places, first_round)
+                first_round = False
+            else:
+                piece, place = state.run(free_pieces, free_places)
+            free_pieces.remove(piece)
+            free_places.remove(place)

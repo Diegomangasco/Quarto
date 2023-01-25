@@ -1,5 +1,5 @@
 import numpy as np
-from .quartoTrain import *
+from ..quartoTrain import *
 
 class UsefulFunctions(object):
     '''Defines useful function for the training'''

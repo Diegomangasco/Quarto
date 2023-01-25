@@ -14,25 +14,27 @@ class RandomPlayer(quarto.Player):
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
 
+def mcts():
+    wins = 0
+    draws = 0
+    games = 10
+    mcts = None
 
-wins = 0
-draws = 0
-games = 10
-mcts = None
+    for i in range(games):
+        print('Game number: ', i+1)
+        game = quarto.Quarto()
+        player = MCTSPlayer(game, 0, iterations=30)
+        game.set_players((player, RandomPlayer(game)))
+        winner = game.run()
+        if winner == -1:
+            draws += 1
+        if winner == 0:
+            wins += 1
+        print('###############')
 
-for i in range(games):
-    print('Game number: ', i+1)
-    game = quarto.Quarto()
-    player = MCTSPlayer(game, 0, iterations=30)
-    game.set_players((player, RandomPlayer(game)))
-    winner = game.run()
-    if winner == -1:
-        draws += 1
-    if winner == 0:
-        wins += 1
-    print('###############')
+    print('Win rate: ', 100*wins/games)
+    print('Draw rate: ', 100*draws/games)
 
-print('Win rate: ', 100*wins/games)
-print('Draw rate: ', 100*draws/games)
+
 
 

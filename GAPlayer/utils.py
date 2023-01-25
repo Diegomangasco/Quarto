@@ -1,10 +1,15 @@
-from MCTS.quartoTrain import *
 import quarto
+from quartoTrain import QuartoTrain
+import numpy as np
+import random
 
 class HardcodedFunctions():
     '''Defines useful function for the training'''
 
     def __init__(self) -> None:
+        pass
+
+    def hardcoded_strategy(self, board):
         pass
 
     def board_score_for_train(self, state: QuartoTrain):
@@ -297,7 +302,7 @@ class HardcodedFunctions():
             if piece_1.SOLID == piece_2.SOLID and piece_1.SOLID == True:
                 positions['couples'] += 1
 
-        return 2*positions['couples']+3*positions['triplets']
+        return positions['couples']+2*positions['triplets']
 
 
     def board_score_for_test(self, state: quarto.Quarto):
@@ -590,5 +595,5 @@ class HardcodedFunctions():
             if piece_1.SOLID == piece_2.SOLID and piece_1.SOLID == True:
                 positions['couples'] += 1
 
-        return 2*positions['couples']+3*positions['triplets']
+        return positions['couples']+2*positions['triplets']
         

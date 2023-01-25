@@ -2,7 +2,7 @@ import random as rnd
 import quarto 
 import numpy as np
 from MCTS.API import *
-from MCTS.quartoTrain import *
+from quartoTrain import *
 import random
 import matplotlib.pyplot as plt
 

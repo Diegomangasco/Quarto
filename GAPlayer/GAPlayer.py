@@ -4,6 +4,7 @@ import numpy as np
 from MCTS.API import *
 from MCTS.quartoTrain import *
 import random
+from .utils import *
 import matplotlib.pyplot as plt
 
 class GAPlayer(quarto.Player):

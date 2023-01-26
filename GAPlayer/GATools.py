@@ -1,9 +1,12 @@
 import random as rnd
 import quarto 
 import numpy as np
-from .quartoTrain import *
 import random
-from .utils import *
+from .ScoreFunction import ScoreFunction
+from .quartoTrain import *
+from RandomPlayer.RandomPlayer import RandomPlayer
+from MCTS.MCTSTools import *
+from HardcodedPlayer.HardcodedPlayer import HardcodedPlayer
 import matplotlib.pyplot as plt
 
 class GATools():
@@ -15,6 +18,7 @@ class GATools():
         self._offspring_size = offspring_size
         self._games_to_play = games_to_play
         self._random_factor = random_factor
+        self._functions = ScoreFunction()
 
     
     def control_thresholds(self, genome: dict, label):
@@ -47,12 +51,65 @@ class GATools():
                 'mcts': max_value_2,
             }]
 
+    def compute_diff(self, score, genome):
+        '''Computes differeces to choose the best agent'''
 
-    def game(self, our_player, state, genome):
+        diff = []
+        diff.append(abs(score - genome['random']))
+        diff.append(abs(score - genome['hardcoded']))
+        diff.append(abs(score - genome['mcts']))
+        return diff.index(min(diff))
+
+
+    def game(self, genome):
         '''Simulate a certain number of games'''
         
+        win_count = 0
         for _ in range(self._games_to_play):
-            pass
+            q = quarto.Quarto()
+            our_player = random.choice([0, 1])
+            random_player = RandomPlayer(q)
+            hardcoded_player = HardcodedPlayer()
+            mcts_player = MCTS(our_player)
+            winner = -1
+            while winner < 0 and not q.check_finished():
+                piece_ok = False
+                while not piece_ok:
+                    if q._current_player == our_player:
+                        board_score = self._functions.board_score(q)
+                        use = self.compute_diff(board_score, genome)
+                        if use == 0:
+                            piece_ok = q.select(random_player.choose_piece())
+                        elif use == 1:
+                            piece_ok = q.select(hardcoded_player) #TODO
+                        else:
+                            piece_ok = q.select(
+                                mcts_player.do_rollout(Node(), iterations=30)._state.get_selected_piece()) #TODO
+                    else:
+                        piece_ok = self.select(random.randint(0, 15))
+                piece_ok = False
+                q._current_player = (q._current_player + 1) % q.MAX_PLAYERS
+                while not piece_ok:
+                    if q._current_player == our_player:
+                        board_score = self._functions.board_score(q)
+                        use = self.compute_diff(board_score, genome)
+                        if use == 0:
+                            x, y = random_player.place_piece()
+                        elif use == 1:
+                            x, y = hardcoded_player #TODO
+                        else:
+                            quarto_train = QuartoTrain(q.get_board_status(), q.get_selected_piece(), q.get_current_player())
+                            x, y = mcts_player.do_rollout(Node(quarto_train), iterations=30)._place_where_move_current
+                    else:
+                        x = random.randint(0, 3)
+                        y = random.randint(0, 3)
+                    piece_ok = q.place(x, y)
+                winner = q.check_winner()
+
+            if winner == our_player:
+                win_count += 1
+
+        return win_count
 
     def crossover(self, genome_1, genome_2):
         '''Crossover function'''
@@ -83,7 +140,7 @@ class GATools():
         return self.control_thresholds(genome_1, 'mutation')
         
     
-    def evolution(self, state: QuartoTrain):
+    def evolution(self):
         '''Evolution of the genomes, trains the algorithm'''
 
         populat = [dict() for _ in range(self._population_size)]
@@ -103,8 +160,7 @@ class GATools():
                 if random.random() < self._random_factor:
                     # Mutation
                     new_genome = self.mutation(selected_1)
-                    our_player = random.choice([0, 1])
-                    win = self.game(our_player, state, new_genome) # Game simulation with a certain set of parameters
+                    win = self.game(new_genome) # Game simulation with a certain set of parameters
                     new_fitness = win/self._games_to_play # New fitness
                     offspring.append({
                         'random': new_genome['random'],
@@ -115,9 +171,8 @@ class GATools():
                 else:
                     # Crossover
                     new_genome_1, new_genome_2 = self.crossover(selected_1, selected_2)
-                    our_player = random.choice([0, 1])
-                    win_1 = self.game(our_player, state, new_genome_1) # Game simulation with a certain set of parameters
-                    win_2 = self.game(our_player, state, new_genome_2)
+                    win_1 = self.game(new_genome_1) # Game simulation with a certain set of parameters
+                    win_2 = self.game(new_genome_2)
                     new_fitness = win_1/self._games_to_play # New fitness
                     offspring.append({
                         'random': new_genome_1['random'],

@@ -2,17 +2,14 @@ import quarto
 import numpy as np
 import random
 
-class HardcodedFunctions():
+class ScoreFunction():
     '''Defines useful function for the training'''
 
     def __init__(self) -> None:
         pass
 
-    def hardcoded_strategy(self, board):
-        pass
 
-
-    def board_score_for_test(self, state: quarto.Quarto):
+    def board_score(self, state: quarto.Quarto):
         '''Computes a score for the board, basing on the number of couples and triplets'''
 
         positions = {

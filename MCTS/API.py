@@ -1,5 +1,5 @@
 import json
-from ..quartoTrain import *
+from .quartoTrain import *
 from .MCTSTools import *
 
 class API():

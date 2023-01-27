@@ -1,6 +1,7 @@
 import quarto
 import random
 from MCTS.MCTSPlayer import *
+from GAPlayer.GATools import *
 
 class RandomPlayer(quarto.Player):
     """Random player"""
@@ -35,6 +36,9 @@ def mcts():
     print('Win rate: ', 100*wins/games)
     print('Draw rate: ', 100*draws/games)
 
+
+gatools = GATools(generations=500, population_size=5, offspring_size=7, games_to_play=5)
+print(gatools.evolution())
 
 
 

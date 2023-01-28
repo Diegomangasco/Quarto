@@ -11,6 +11,9 @@ class PieceTrain(object):
         self.SQUARE = square
 
 class QuartoTrain(object):
+    '''QuartoTrain is basically a copy of Quarto class in which is possible to set manually the
+    current board, the current piece and the current player. \n
+    It was created for MCTS that needs to have a Quarto object from a given 'state'.'''
 
     MAX_PLAYERS = 2
     BOARD_SIDE = 4

@@ -4,6 +4,7 @@ from MCTS.MCTSPlayer import *
 from GAPlayer.GATools import *
 from GAPlayer.GAPlayer import *
 from HardcodedPlayer.HardcodedPlayer import *
+from GAPlayer.scoreFunction import *
 
 class RandomPlayer(quarto.Player):
     """Random player"""
@@ -59,8 +60,36 @@ def hardcoded():
     print('Win rate: ', 100*wins/games, '%')
     print('Draw rate: ', 100*draws/games, '%')
 
+def score():
+    games = 200
+    scores = []
+
+    for i in range(games):
+        print('Game number: ', i+1)
+        q = quarto.Quarto()
+        winner = -1
+        while winner < 0 and not q.check_finished():
+            # q.print()
+            piece_ok = False
+            while not piece_ok:
+                piece_ok = q.select(
+                    random.randint(0, 15))
+            piece_ok = False
+            q._current_player = (
+                q._current_player + 1) % q.MAX_PLAYERS
+            # self.print()
+            while not piece_ok:
+                x, y = random.randint(0, 3), random.randint(0, 3)
+                piece_ok = q.place(x, y)
+            winner = q.check_winner()
+            scores.append(ScoreFunction().board_score(q))
+        print('###############')
+
+    scores.sort(reverse=True)
+    print(scores[:10])
+
 def gatools():
-    gatools = GATools(generations=100, population_size=10, offspring_size=50, games_to_play=6)
+    gatools = GATools(generations=300, population_size=10, offspring_size=50, games_to_play=5)
     print(gatools.evolution())
 
 def ga():
@@ -84,6 +113,7 @@ def ga():
 
 # mcts()
 #hardcoded()
+# score()
 gatools()
 # ga()
 

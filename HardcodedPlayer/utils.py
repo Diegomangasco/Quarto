@@ -341,8 +341,8 @@ class HardcodedFunctions():
                     if piece[1].SOLID == True:
                         avoid_pieces.add(piece[0])
         if board[0, 3] != -1 and board[1, 2] != -1 and board[2, 1] == -1 and board[3, 0] != -1:
-            piece_1 = state.get_piece_charachteristics(board[1, 2])
-            piece_2 = state.get_piece_charachteristics(board[0, 3])
+            piece_1 = state.get_piece_charachteristics(board[0, 3])
+            piece_2 = state.get_piece_charachteristics(board[1, 2])
             piece_3 = state.get_piece_charachteristics(board[3, 0])
             if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True:
                     for piece in free_pieces:
@@ -581,8 +581,8 @@ class HardcodedFunctions():
             if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                 return 1, 2
         if board[0, 3] != -1 and board[1, 2] != -1 and board[2, 1] == -1 and board[3, 0] != -1:
-            piece_1 = state.get_piece_charachteristics(board[1, 2])
-            piece_2 = state.get_piece_charachteristics(board[0, 3])
+            piece_1 = state.get_piece_charachteristics(board[0, 3])
+            piece_2 = state.get_piece_charachteristics(board[1, 2])
             piece_3 = state.get_piece_charachteristics(board[3, 0])
             if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                 return 2, 1

@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 class RLPlayer(quarto.Player):
     '''Defines a Reinforcement Learning player'''
 
+    # Not implemented because the configuration I have chosen for the Renforcement Learning didn't bring to 
+    # an agent that "learns" something
+    # This trial simply drives to a Random Player basically
     def __init__(self, quarto) -> None:
         super().__init__(quarto)
         self._quarto = quarto
@@ -58,9 +61,9 @@ class RLTools():
         '''Trains the RL agent against a Random Player'''
 
         number_win_local = 0
-        random_counter = 0
-        all_moves = 0
-        tree = self._api_MCTS.load_MCTS()
+        random_counter = 0 # Counts how many times our agent is forced to play randomly
+        all_moves = 0 # Counts all moves done during the games
+        tree = self._api_MCTS.load_MCTS() # Take the tree from the database
 
         for _ in range(iterations):
             lead = copy.deepcopy(root)
@@ -69,6 +72,7 @@ class RLTools():
 
             piece = -1
 
+            # Simulate a game against Random Player
             while not self._api_MCTS.is_terminal(lead):
 
                 all_moves += 1
@@ -76,6 +80,7 @@ class RLTools():
 
                 if our_player == lead._current_player: # Agent chooses, Random places
                     
+                    # Search into the stored tree, it basically always doesn't find nothing
                     piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece)
 
                     if not piece_place_score:
@@ -85,6 +90,7 @@ class RLTools():
                         flag_random = True
                     
                     else:
+                        # If present in the tree, use it
                         piece = piece_place_score[0]
                         flag_random = False
                     
@@ -94,6 +100,7 @@ class RLTools():
 
                     _piece = random.choice(free_pieces) # Random player
                     
+                    # Search into the stored tree, it basically always doesn't find nothing
                     piece_place_score = self._api_MCTS.choose_node_using_MCTS(tree, lead, piece, _piece, restricted=True)
 
                     if not piece_place_score:
@@ -102,23 +109,25 @@ class RLTools():
                         place = random.choice(free_places)
                         flag_random = True
                     else:
+                        # If present in the tree, use it
                         place = piece_place_score[1]
                         flag_random = False
 
                     piece = _piece
 
-                new_state = self._api_MCTS.create_state(lead, piece, place)
+                new_state = self._api_MCTS.create_state(lead, piece, place) # Create a new state for the RL data structure
                 hash = self._api_MCTS.mcts.functions.hash_function(piece, new_state.get_board_status())
 
                 if hash not in self._G.keys():
                     if flag_random:
                         reward = self.init_reward(hash, piece)
                     else:
+                        # The reward is taken from the score of the node, stored in the tree
                         reward = piece_place_score[2]
                         self._G[hash] = reward
 
                 self.update_state_history(hash, reward)
-                lead = new_state
+                lead = new_state # New state of the game
 
 
             if self._api_MCTS.check_if_won(lead, our_player):

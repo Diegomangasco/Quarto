@@ -1,13 +1,12 @@
-import random as rnd
 import quarto 
-import numpy as np
 import random
-from .ScoreFunction import ScoreFunction
+from .scoreFunction import ScoreFunction
 from .quartoTrain import *
 from RandomPlayer.RandomPlayer import RandomPlayer
 from MCTS.MCTSTools import *
 from HardcodedPlayer.HardcodedPlayer import HardcodedPlayer
-import matplotlib.pyplot as plt
+
+GENOME_VAL_UPPER_BOUND = 16
 
 class GATools():
     '''Defines a set of Genetic Algorithm tools'''
@@ -19,50 +18,7 @@ class GATools():
         self._games_to_play = games_to_play
         self._random_factor = random_factor
         self._mcts_rollouts = mcts_rollouts
-        self._functions = ScoreFunction()
-
-    
-    def control_thresholds(self, genome: dict, label):
-        '''Controls thresholds for keeping the order random < hardcoded < mcts'''
-
-        if label == 'mutation':
-            v = list(genome.values())
-            min_value = min(v)
-            max_value = max(v)
-            v.remove(min_value)
-            v.remove(max_value)
-            middle_value = v[0]
-            return {
-                'random': min_value,
-                'hardcoded': middle_value,
-                'mcts': max_value,
-                'fitness': genome['fitness']
-            }
-        else:
-            v = list(genome[0].values())
-            min_value_1 = min(v)
-            max_value_1 = max(v)
-            v.remove(min_value_1)
-            v.remove(max_value_1)
-            middle_value_1 = v[0]
-            v = list(genome[1].values())
-            min_value_2 = min(v)
-            max_value_2 = max(v)
-            v.remove(min_value_2)
-            v.remove(max_value_2)
-            middle_value_2 = v[0]
-            return [{
-                'random': min_value_1,
-                'hardcoded': middle_value_1,
-                'mcts': max_value_1,
-                'fitness': genome[0]['fitness']
-            },
-            {
-                'random': min_value_2,
-                'hardcoded': middle_value_2,
-                'mcts': max_value_2,
-                'fitness': genome[1]['fitness']
-            }]
+        self._functions = ScoreFunction()        
 
     def compute_diff(self, score, genome):
         '''Computes differeces to choose the best agent'''
@@ -135,47 +91,49 @@ class GATools():
 
         return win_count
 
+    def control_thresholds(self, genome: dict):
+        '''Controls thresholds for keeping the order random < hardcoded < mcts'''
+
+        if genome['random'] > genome['hardcoded']:
+            genome['random'], genome['hardcoded'] = genome['hardcoded'], genome['random']
+        if genome['hardcoded'] > genome['mcts']:
+            genome['hardcoded'], genome['mcts'] = genome['mcts'], genome['hardcoded']
+        if genome['random'] > genome['hardcoded']:
+            genome['random'], genome['hardcoded'] = genome['hardcoded'], genome['random']
+        return genome
+
     def crossover(self, genome_1, genome_2):
         '''Crossover function'''
 
-        return  self.control_thresholds([
+        return  self.control_thresholds(
             {
                 # Average crossover
                 'random': (genome_1['random']+genome_2['random'])*0.5,
                 'hardcoded': (genome_1['hardcoded']+genome_2['hardcoded'])*0.5,
                 'mcts': (genome_1['mcts']+genome_2['mcts'])*0.5,
                 'fitness': genome_1['fitness'],
-            },
-            {
-                # Random crossover
-                'random': random.choice([genome_1['random'], genome_2['random']]),
-                'hardcoded': random.choice([genome_1['hardcoded'], genome_2['hardcoded']]),
-                'mcts': random.choice([genome_1['mcts'], genome_2['mcts']]),
-                'fitness': genome_2['fitness'],
-            }
-        ], 'crossover')
+            })
 
-    def mutation(self, genome_1):
+    def mutation(self, genome):
         '''Mutation function'''
 
         while random.random() < .4:
-            genome_1['random'] = random.randint(0, 16)
-            genome_1['hardcoded'] = random.randint(0, 16)
-            genome_1['mcts'] = random.randint(0, 16)
+            genome['random'] = random.random()*GENOME_VAL_UPPER_BOUND
+            genome['hardcoded'] = genome['random'] + random.random()*(GENOME_VAL_UPPER_BOUND-genome['random'])
+            genome['mcts'] = genome['hardcoded'] + random.random()*(GENOME_VAL_UPPER_BOUND-genome['hardcoded'])
 
-        return self.control_thresholds(genome_1, 'mutation')
+        return self.control_thresholds(genome)
         
-    
     def evolution(self):
         '''Evolution of the genomes, trains the algorithm'''
 
         populat = [dict() for _ in range(self._population_size)]
         for p in populat:
-            p['random'] = random.randint(0, 16)
-            p['hardcoded'] = random.randint(0, 16)
-            p['mcts'] = random.randint(0, 16)
+            p['random'] = random.random()*GENOME_VAL_UPPER_BOUND
+            p['hardcoded'] = p['random'] + random.random()*(GENOME_VAL_UPPER_BOUND-p['random'])
+            p['mcts'] = p['hardcoded'] + random.random()*(GENOME_VAL_UPPER_BOUND-p['hardcoded'])
             p['fitness'] = 0.0
-        population = [self.control_thresholds(g, 'mutation') for g in populat]
+        population = [self.control_thresholds(g) for g in populat]
         
         # Loop over generations
         for generation in range(self._generations):
@@ -187,34 +145,21 @@ class GATools():
                 if random.random() < self._random_factor:
                     # Mutation
                     new_genome = self.mutation(selected_1)
-                    win = self.game(new_genome) # Game simulation with a certain set of parameters
-                    new_fitness = win/self._games_to_play # New fitness
-                    offspring.append({
-                        'random': new_genome['random'],
-                        'hardcoded': new_genome['hardcoded'],
-                        'mcts': new_genome['mcts'],
-                        'fitness': new_fitness
-                    })
                 else:
                     # Crossover
-                    new_genome_1, new_genome_2 = self.crossover(selected_1, selected_2)
-                    win_1 = self.game(new_genome_1) # Game simulation with a certain set of parameters
-                    win_2 = self.game(new_genome_2)
-                    new_fitness = win_1/self._games_to_play # New fitness
-                    offspring.append({
-                        'random': new_genome_1['random'],
-                        'hardcoded': new_genome_1['hardcoded'],
-                        'mcts': new_genome_1['mcts'],
-                        'fitness': new_fitness
-                    })
-                    new_fitness = win_2/self._games_to_play # New fitness
-                    offspring.append({
-                        'random': new_genome_2['random'],
-                        'hardcoded': new_genome_2['hardcoded'],
-                        'mcts': new_genome_2['mcts'],
-                        'fitness': new_fitness
-                    })
+                    new_genome = self.crossover(selected_1, selected_2)
+                
+                win = self.game(new_genome) # Game simulation with a certain set of parameters
+                new_fitness = win/self._games_to_play # New fitness
+                offspring.append({
+                    'random': new_genome['random'],
+                    'hardcoded': new_genome['hardcoded'],
+                    'mcts': new_genome['mcts'],
+                    'fitness': new_fitness
+                })
 
             population += offspring
             population = sorted(population, key=lambda i: i['fitness'], reverse=True)[:self._population_size]
+        with open('./GAPlayer/parameters.json', 'w') as fp:
+            fp.write(json.dumps([population[0]['random'], population[0]['hardcoded'], population[0]['mcts']]))
         return population[0]['random'], population[0]['hardcoded'], population[0]['mcts']

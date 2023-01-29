@@ -21,7 +21,21 @@ class GAPlayer(quarto.Player):
         self._mcts_player = MCTS(0)
         with open('./GAPlayer/parameters.json', 'r') as fp:
             # Read parameters saved at the end of the training phase
-            self._genome = json.load(fp)
+            genome = json.load(fp)
+        self._genome = dict()
+        self._genome['random'] = float(genome[0])
+        self._genome['hardcoded'] = float(genome[1])
+        self._genome['mcts'] = float(genome[2])
+
+    def compute_diff(self, score, genome):
+        '''Computes differeces between the current board score and the genome parameters.\n
+        The lowest difference indicates what is the best agent in that moment.'''
+
+        diff = []
+        diff.append(abs(score - genome['random']))
+        diff.append(abs(score - genome['hardcoded']))
+        diff.append(abs(score - genome['mcts']))
+        return diff.index(min(diff))
 
     def choose_piece(self) -> int:
         board_score = self._functions.board_score(self.get_game()) # Make the scoring of the current board
@@ -29,19 +43,19 @@ class GAPlayer(quarto.Player):
         if use == 0:
             # Use Random Player
             piece = self._random_player.choose_piece()
-            last_state = None # Next MCTS must rollouts
+            self._last_state = None # Next MCTS must rollouts
             return piece
         elif use == 1:
             # Use Hardcoded Player
             piece = self._hardcoded_player.choose_piece()
-            last_state = None # Next MCTS must rollouts
+            self._last_state = None # Next MCTS must rollouts
             return piece
         else:
             # Use MCTS Player
-            if last_state != None:
+            if self._last_state != None:
                 # This branch is visited only if the previous 'place_piece' was done with MCTS
                 piece = self._last_state._state.get_selected_piece()
-                last_state = None # Next MCTS must rollouts
+                self._last_state = None # Next MCTS must rollouts
                 return piece
             else:
                 # This branch is visited when the previous 'place_piece' wasn't done with MCTS
@@ -56,16 +70,16 @@ class GAPlayer(quarto.Player):
         if use == 0:
             # Use Random Player
             x, y = self._random_player.place_piece()
-            last_state = None
+            self._last_state = None
             return x, y
         elif use == 1:
             # Use Hardcoded Player
             x, y = self._hardcoded_player.place_piece()
-            last_state = None
+            self._last_state = None
             return x, y
         else:
             # Use MCTS Player and update 'last_state' variable
             quarto_train = QuartoTrain(self.get_game().get_board_status(), self.get_game().get_selected_piece(), self.get_game().get_current_player())
-            last_state = self._mcts_player.do_rollout(Node(quarto_train), iterations=30)
-            x, y = last_state._place_where_move_current
+            self._last_state = self._mcts_player.do_rollout(Node(quarto_train), iterations=30)
+            x, y = self._last_state._place_where_move_current
             return x, y

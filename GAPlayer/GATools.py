@@ -8,7 +8,7 @@ from MCTS.MCTSTools import *
 from HardcodedPlayer.HardcodedPlayer import HardcodedPlayer
 
 # This variable was set after some trials (heuristics)
-GENOME_VAL_UPPER_BOUND = 17 
+GENOME_VAL_UPPER_BOUND = 10 
 
 class GATools():
     '''Defines a set of Genetic Algorithm tools. \n

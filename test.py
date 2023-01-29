@@ -60,6 +60,26 @@ def hardcoded():
     print('Win rate: ', 100*wins/games, '%')
     print('Draw rate: ', 100*draws/games, '%')
 
+def __hardcoded():
+    wins = 0
+    draws = 0
+    games = 1000
+
+    for i in range(games):
+        print('Game number: ', i+1)
+        game = quarto.Quarto()
+        hardcoded_player = 0
+        game.set_players((HardcodedPlayer(game), RandomPlayer(game)))
+        winner = game.run()
+        if winner == -1:
+            draws += 1
+        if winner == hardcoded_player:
+            wins += 1
+        print('###############')
+
+    print('Win rate: ', 100*wins/games, '%')
+    print('Draw rate: ', 100*draws/games, '%')
+
 def score():
     games = 200
     scores = []
@@ -95,7 +115,7 @@ def gatools():
 def ga():
     wins = 0
     draws = 0
-    games = 10
+    games = 100
 
     for i in range(games):
         print('Game number: ', i+1)
@@ -111,10 +131,11 @@ def ga():
     print('Win rate: ', 100*wins/games)
     print('Draw rate: ', 100*draws/games)
 
-# mcts()
+#mcts()
 #hardcoded()
-# score()
-gatools()
-# ga()
+__hardcoded()
+#score()
+#gatools()
+#ga()
 
 

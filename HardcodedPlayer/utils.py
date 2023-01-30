@@ -38,7 +38,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -58,7 +58,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -78,7 +78,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -98,7 +98,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -122,7 +122,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -142,7 +142,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -162,7 +162,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -182,7 +182,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                     for piece in free_pieces:
                         if piece[1].COLOURED == True:
                             avoid_pieces.add(piece[0])
@@ -205,7 +205,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -225,7 +225,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -245,7 +245,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -265,7 +265,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -288,7 +288,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -308,7 +308,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -328,7 +328,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -348,7 +348,7 @@ class HardcodedFunctions():
                     for piece in free_pieces:
                         if piece[1].HIGH == True:
                             avoid_pieces.add(piece[0])
-            if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True:
                 for piece in free_pieces:
                     if piece[1].COLOURED == True:
                         avoid_pieces.add(piece[0])
@@ -396,7 +396,7 @@ class HardcodedFunctions():
                 piece_3 = state.get_piece_charachteristics(board[i, 2])
                 if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                     return i, 3
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                     return i, 3
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 3
@@ -408,7 +408,7 @@ class HardcodedFunctions():
                 piece_3 = state.get_piece_charachteristics(board[i, 3])
                 if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                     return i, 0
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                     return i, 0
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 0
@@ -420,7 +420,7 @@ class HardcodedFunctions():
                 piece_3 = state.get_piece_charachteristics(board[i, 3])
                 if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                     return i, 1
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                     return i, 1
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 1
@@ -432,7 +432,7 @@ class HardcodedFunctions():
                 piece_3 = state.get_piece_charachteristics(board[i, 3])
                 if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                     return i, 2
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                     return i, 2
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 2
@@ -448,7 +448,7 @@ class HardcodedFunctions():
                 piece_3 = state.get_piece_charachteristics(board[2, i])
                 if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                     return 3, i
-                if piece_1.HIGH == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
+                if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                     return 3, i
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return 3, i

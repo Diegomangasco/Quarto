@@ -33,7 +33,7 @@ class API():
     def choose_node_using_MCTS(self, tree: dict, state: QuartoTrain, piece: int, new_piece=None, restricted=False):
         '''Chooses a node using the MCTS trained tree'''
 
-        # Restricted is a flag that if set to True, forced to control if the piece choosen is associated with one child of the Node
+        # Restricted is a flag that if set to True, forced to control if the piece chosen is associated with one child of the Node
 
         hashes = [self.mcts.functions.hash_function(piece, board) for board in self.mcts.functions.symmetries(state.get_board_status())]
         hashes.append(self.mcts.functions.hash_function(piece, state.get_board_status()))

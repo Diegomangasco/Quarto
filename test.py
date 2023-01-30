@@ -131,9 +131,9 @@ def ga():
     print('Win rate: ', 100*wins/games)
     print('Draw rate: ', 100*draws/games)
 
-#mcts()
+mcts()
 #hardcoded()
-__hardcoded()
+#__hardcoded()
 #score()
 #gatools()
 #ga()

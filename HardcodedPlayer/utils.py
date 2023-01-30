@@ -521,13 +521,13 @@ class HardcodedFunctions():
             piece_1 = state.get_piece_charachteristics(board[0, 0])
             piece_2 = state.get_piece_charachteristics(board[2, 2])
             piece_3 = state.get_piece_charachteristics(board[3, 3])
-            if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True and piece_to_place.HIGH == True:
+            if piece_1.HIGH == piece_2.HIGH and piece_3.HIGH == piece_2.HIGH and piece_1.HIGH == True and piece_to_place.HIGH == True:
                 return 1, 1
-            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True and piece_to_place.COLOURED == True:
+            if piece_1.COLOURED == piece_2.COLOURED and piece_3.COLOURED == piece_2.COLOURED and piece_1.COLOURED == True and piece_to_place.COLOURED == True:
                 return 1, 1
-            if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True and piece_to_place.SQUARE == True:
+            if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                 return 1, 1
-            if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True and piece_to_place.SOLID == True:
+            if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                 return 1, 1
         if board[0, 0] != -1 and board[1, 1] != -1 and board[2, 2] == -1 and board[3, 3] != -1:
             piece_1 = state.get_piece_charachteristics(board[0, 0])

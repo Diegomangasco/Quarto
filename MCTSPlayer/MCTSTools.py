@@ -51,7 +51,7 @@ class Node:
         '''Updates node statistics, the node was visited and brings or not to a win.'''
 
         self._visits += 1
-        self._wins += reward # result can be +1 (win) or 0 (draw or loose)
+        self._wins += reward # result can be +1 (win), 0.5 (draw) or 0 (loose)
 
     def reward(self, player_id):
         '''Establishes a reward at the end of a game. \n

@@ -1,6 +1,6 @@
 import quarto
 import random
-from MCTS.MCTSPlayer import *
+from MCTSPlayer.MCTSPlayer import *
 from GAPlayer.GATools import *
 from GAPlayer.GAPlayer import *
 from HardcodedPlayer.HardcodedPlayer import *

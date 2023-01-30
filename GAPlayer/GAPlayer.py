@@ -2,7 +2,7 @@ import quarto
 import json
 from .scoreFunction import *
 from RandomPlayer.RandomPlayer import RandomPlayer
-from MCTS.MCTSTools import *
+from MCTSPlayer.MCTSTools import *
 from HardcodedPlayer.HardcodedPlayer import HardcodedPlayer
 from .quartoTrain import QuartoTrain
 

@@ -4,7 +4,7 @@ import json
 from .scoreFunction import ScoreFunction
 from .quartoTrain import *
 from RandomPlayer.RandomPlayer import RandomPlayer
-from MCTS.MCTSTools import *
+from MCTSPlayer.MCTSTools import *
 from HardcodedPlayer.HardcodedPlayer import HardcodedPlayer
 
 # This variable was set after some trials (heuristics)

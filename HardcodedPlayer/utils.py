@@ -400,7 +400,7 @@ class HardcodedFunctions():
                     return i, 3
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 3
-                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SQUARE == True:
+                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                     return i, 3
             if board[i, 0] == -1 and board[i, 1] != -1 and board[i, 2] != -1 and board[i, 3] != -1:
                 piece_1 = state.get_piece_charachteristics(board[i, 1])
@@ -412,7 +412,7 @@ class HardcodedFunctions():
                     return i, 0
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 0
-                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SQUARE == True:
+                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                     return i, 0
             if board[i, 0] != -1 and board[i, 1] == -1 and board[i, 2] != -1 and board[i, 3] != -1:
                 piece_1 = state.get_piece_charachteristics(board[i, 0])
@@ -424,7 +424,7 @@ class HardcodedFunctions():
                     return i, 1
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 1
-                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SQUARE == True:
+                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                     return i, 1
             if board[i, 0] != -1 and board[i, 1] != -1 and board[i, 2] == -1 and board[i, 3] != -1:
                 piece_1 = state.get_piece_charachteristics(board[i, 0])
@@ -436,7 +436,7 @@ class HardcodedFunctions():
                     return i, 2
                 if piece_1.SQUARE == piece_2.SQUARE and piece_3.SQUARE == piece_2.SQUARE and piece_1.SQUARE == True and piece_to_place.SQUARE == True:
                     return i, 2
-                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SQUARE == True:
+                if piece_1.SOLID == piece_2.SOLID and piece_3.SOLID == piece_2.SOLID and piece_1.SOLID == True and piece_to_place.SOLID == True:
                     return i, 2
 
         # Check all the columns triplets 
